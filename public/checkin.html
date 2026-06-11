@@ -6,77 +6,17 @@
   <title>簽到牆</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,500;0,700;0,900;1,500&family=Noto+Serif+TC:wght@400;600;900&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;0,900;1,500&family=Noto+Serif+TC:wght@400;600;900&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/brand.css">
   <script src="https://cdn.jsdelivr.net/gh/davidshimjs/qrcodejs@04f46c6a/qrcode.min.js"></script>
   <style>
-    :root {
-      --blue: #144EA0; --pink: #CF98AE; --nylon: #131610;
-      --paper: #f4f2ea; --ink: #131610; --muted: #6f6a5d; --rule: rgba(19,22,16,.2);
-      --serif: "Noto Serif TC", Georgia, "Songti TC", serif;
-      --display: "Playfair Display", "Noto Serif TC", Georgia, serif;
-      --mono: "Space Mono", ui-monospace, "Courier New", monospace;
-    }
-    * { box-sizing: border-box; }
-    body { margin: 0; background: var(--paper); color: var(--ink); font-family: var(--serif);
-      -webkit-font-smoothing: antialiased; }
     .wrap { max-width: 620px; margin: 0 auto; padding: 26px 22px 60px; }
-
-    /* 刊頭 masthead */
-    .rule { height: 1px; background: var(--ink); }
-    .rule.thin { background: var(--rule); }
-    .kicker { display: flex; justify-content: space-between; align-items: baseline;
-      font-family: var(--mono); font-size: 11px; letter-spacing: 2px; text-transform: uppercase;
-      padding: 8px 0; color: var(--ink); }
-    .live { color: var(--blue); font-weight: 700; }
-    .live::before { content: "●"; font-size: 8px; vertical-align: middle; margin-right: 5px; }
-    h1 { font-family: var(--display); font-weight: 900; font-size: clamp(38px, 9vw, 60px);
-      line-height: .98; letter-spacing: -.5px; margin: 18px 0 10px; }
-    .dek { font-family: var(--display); font-style: italic; font-size: 18px; color: var(--muted); margin-bottom: 14px; }
-
-    /* QR */
     .qr { display: flex; gap: 16px; align-items: center; padding: 16px 0; }
     .qr #qrcode { flex: 0 0 auto; border: 1px solid var(--ink); padding: 6px; background: #fff; }
-    .qr #qrcode img, .qr #qrcode canvas { display: block; }
-    .qr .lab { font-family: var(--mono); font-size: 11px; letter-spacing: 2px; text-transform: uppercase; color: var(--blue); margin-bottom: 6px; }
+    .qr .lab { font-family: var(--mono); font-size: 11px; letter-spacing: 2px; text-transform: uppercase; color: var(--coral); margin-bottom: 6px; }
     .qr .txt { font-size: 15px; color: var(--muted); line-height: 1.5; }
-
-    /* 表單 */
-    form { padding: 18px 0 6px; }
-    .flabel { font-family: var(--mono); font-size: 11px; letter-spacing: 2px; text-transform: uppercase; color: var(--muted); margin: 14px 0 4px; display: block; }
-    input, textarea { width: 100%; border: 0; border-bottom: 1.5px solid var(--ink); background: transparent;
-      font-family: var(--serif); font-size: 19px; color: var(--ink); padding: 8px 2px; outline: none; border-radius: 0; }
-    input::placeholder, textarea::placeholder { color: #b3ad9e; }
-    input:focus, textarea:focus { border-color: var(--blue); }
-    textarea { resize: none; min-height: 40px; line-height: 1.5; }
-    .emojis { display: flex; gap: 8px; flex-wrap: wrap; margin: 16px 0 8px; }
-    .emojis button { font-size: 19px; background: transparent; border: 1px solid var(--rule); border-radius: 0;
-      width: 40px; height: 40px; cursor: pointer; padding: 0; line-height: 1; transition: .12s; }
-    .emojis button.on { border-color: var(--pink); background: var(--pink); }
-    .send-row { display: flex; justify-content: space-between; align-items: center; margin-top: 18px; }
-    .send { background: var(--blue); color: #fff; border: 0; border-radius: 0; padding: 13px 26px; cursor: pointer;
-      font-family: var(--mono); font-size: 13px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; }
-    .send:disabled { opacity: .55; }
-    .err { color: #b3261e; font-size: 13px; font-family: var(--mono); }
-
-    /* 留言計數 */
-    .count { display: flex; align-items: center; gap: 14px; margin: 30px 0 4px;
-      font-family: var(--mono); font-size: 12px; letter-spacing: 2px; text-transform: uppercase; color: var(--ink); }
-    .count .line { flex: 1; height: 1px; background: var(--ink); }
-    .count b { font-family: var(--display); font-size: 20px; }
-
-    /* 留言條目 */
-    .feed { margin-top: 6px; }
-    .entry { display: grid; grid-template-columns: 46px 1fr; gap: 14px; padding: 20px 0; border-top: 1px solid var(--rule); }
-    .entry.new { background: linear-gradient(90deg, rgba(20,78,160,.07), transparent 60%); }
-    .entry .no { font-family: var(--display); font-weight: 700; font-size: 26px; line-height: 1; }
-    .entry .meta { display: flex; align-items: baseline; gap: 10px; }
-    .entry .name { font-family: var(--mono); font-weight: 700; font-size: 13px; letter-spacing: 1px; text-transform: uppercase; }
-    .entry .time { margin-left: auto; font-family: var(--mono); font-size: 11px; color: var(--muted); }
-    .entry .msg { font-family: var(--serif); font-size: 19px; line-height: 1.55; margin-top: 8px; word-break: break-word; white-space: pre-wrap; }
-    .entry .emoji { font-size: 20px; margin-top: 8px; }
-
-    footer { margin-top: 40px; text-align: center; font-family: var(--mono); font-size: 10px; letter-spacing: 3px; text-transform: uppercase; color: var(--muted); }
-    .center-msg { text-align: center; color: var(--muted); padding: 30px 0; font-style: italic; }
+    .send-row { display: flex; justify-content: space-between; align-items: center; margin-top: 18px; gap: 12px; }
+    .modetag { color: var(--coral); }
   </style>
 </head>
 <body>
@@ -86,56 +26,69 @@
     const slug = decodeURIComponent((location.pathname.split("/s/")[1] || "")).replace(/\/+$/,"");
     const app = document.getElementById("app");
     const EMOJIS = ["👋","👍","🎉","🔥","✏️","❤️","😀","🙌"];
-    const ACCENT = ["#144EA0", "#131610", "#CF98AE"]; // 你的三色輪替
+    const ACCENT = ["#c0543d", "#cf98ae", "#7f8a6f"];
     const seen = new Set();
     let chosenEmoji = "👋";
+    let SESSION = null;
+    const clientId = getClientId();
+
+    function getClientId() {
+      let v = localStorage.getItem("cw-client");
+      if (!v) { v = crypto.randomUUID(); localStorage.setItem("cw-client", v); }
+      return v;
+    }
+    const MODE_LABEL = { checkin: "簽到 Check-in", message: "留言 Message", qa: "提問 Q&A" };
 
     async function init() {
       if (!slug) { app.innerHTML = `<div class="center-msg">網址缺少課程代碼</div>`; return; }
       try {
         const res = await fetch(`/api/session?slug=${encodeURIComponent(slug)}`);
         if (!res.ok) throw new Error((await res.json()).error || "找不到場次");
-        render(await res.json());
+        SESSION = await res.json();
+        render();
       } catch (e) { app.innerHTML = `<div class="center-msg">😵 ${escapeHtml(e.message)}</div>`; }
     }
 
-    function render(s) {
-      document.title = s.title + " · 簽到牆";
+    function render() {
+      const s = SESSION;
+      document.title = s.title + " · " + MODE_LABEL[s.mode];
       const today = new Date().toLocaleDateString("en-US", { month: "short", day: "2-digit", year: "numeric" }).toUpperCase();
+      const dek = s.mode === "checkin" ? "輸入你的名字完成簽到。"
+        : s.mode === "qa" ? "把想問的問題貼上來，也幫想問的問題按個讚。"
+        : "留下你的名字與一句話，跟大家打個招呼。";
+      const namePh = s.allowAnonymous ? "你的名字（可留空 = 匿名）" : "你的名字";
+      const hasText = s.mode !== "checkin";
+      const textLabel = s.mode === "qa" ? "你的問題 / Question" : "一句話 / Note";
+      const textPh = s.mode === "qa" ? "想問的問題…" : "想說的話…";
+      const btnLabel = s.mode === "checkin" ? "簽到 Check in →" : s.mode === "qa" ? "送出問題 →" : "送出 Send →";
+
       app.innerHTML = `
         <div class="rule"></div>
-        <div class="kicker"><span class="live">LIVE</span><span>CHECK·IN WALL — ${today}</span></div>
+        <div class="kicker"><span class="live">LIVE · <span class="modetag">${MODE_LABEL[s.mode]}</span></span><span>CHECK·IN WALL — ${today}</span></div>
         <div class="rule thin"></div>
-
-        <h1>${escapeHtml(s.title)}</h1>
-        <div class="dek">留下你的名字${s.allowMessage ? "與一句話" : ""}，在牆上留下一筆。</div>
-
+        <h1 class="h-title">${escapeHtml(s.title)}</h1>
+        <div class="dek">${dek}</div>
         <div class="rule thin"></div>
         <div class="qr">
           <div id="qrcode"></div>
-          <div><div class="lab">Scan to join · 掃描加入</div><div class="txt">用手機掃描，即可在自己的裝置上簽到留言。</div></div>
+          <div><div class="lab">Scan to join · 掃描加入</div><div class="txt">用手機掃描，在自己的裝置上${s.mode==="qa"?"提問":s.mode==="checkin"?"簽到":"留言"}。</div></div>
         </div>
         <div class="rule thin"></div>
-
         <form id="form">
-          <label class="flabel" for="name">你的名字 / Name</label>
-          <input id="name" maxlength="40" placeholder="在此輸入…" autocomplete="name" />
-          ${s.allowMessage ? `
-          <label class="flabel" for="message">一句話 / Note</label>
-          <textarea id="message" maxlength="200" placeholder="想對大家說的話…"></textarea>
-          <label class="flabel">心情</label>
-          <div class="emojis" id="emojis"></div>` : ``}
-          <div class="send-row"><span class="err" id="err"></span><button class="send" id="send" type="submit">送出 Send →</button></div>
+          <label class="flabel" for="name">${s.allowAnonymous ? "名字（選填）" : "你的名字 / Name"}</label>
+          <div class="field"><input id="name" maxlength="40" placeholder="${namePh}" autocomplete="name" /></div>
+          ${hasText ? `<label class="flabel" for="message">${textLabel}</label><div class="field"><textarea id="message" maxlength="280" placeholder="${textPh}"></textarea></div>` : ``}
+          ${s.allowEmoji ? `<label class="flabel">心情</label><div class="emojis" id="emojis"></div>` : ``}
+          <div class="send-row"><span class="err" id="err"></span><button class="btn" id="send" type="submit">${btnLabel}</button></div>
         </form>
-
-        <div class="count"><span>留言 Entries</span><span class="line"></span><b id="count">00</b></div>
+        <div class="count"><span>${s.mode==="qa"?"問題 Questions":s.mode==="checkin"?"簽到 Check-ins":"留言 Entries"}</span><span class="ln"></span><b id="count">00</b></div>
         <div class="feed" id="feed"></div>
-        <footer>✦ ✦ ✦</footer>
+        <footer>✦ Summer's Lab ✦</footer>
       `;
 
-      if (window.QRCode) new QRCode(document.getElementById("qrcode"), { text: location.href, width: 80, height: 80, colorDark: "#131610", colorLight: "#ffffff" });
+      if (window.QRCode) new QRCode(document.getElementById("qrcode"), { text: location.href, width: 80, height: 80, colorDark: "#1c1b16", colorLight: "#ffffff" });
 
-      if (s.allowMessage) {
+      if (s.allowEmoji) {
         const box = document.getElementById("emojis");
         box.innerHTML = EMOJIS.map(e => `<button type="button" data-e="${e}" class="${e===chosenEmoji?"on":""}">${e}</button>`).join("");
         box.querySelectorAll("button").forEach(b => b.onclick = () => {
@@ -149,18 +102,20 @@
       const msgEl = document.getElementById("message");
       form.onsubmit = async (ev) => {
         ev.preventDefault();
-        const name = nameEl.value.trim();
         const err = document.getElementById("err");
         const btn = document.getElementById("send");
         err.textContent = "";
-        if (!name) { err.textContent = "請輸入名字"; nameEl.focus(); return; }
+        const name = nameEl.value.trim();
+        if (!name && !s.allowAnonymous) { err.textContent = "請輸入名字"; nameEl.focus(); return; }
+        if (hasText && msgEl && !msgEl.value.trim()) { err.textContent = s.mode==="qa"?"請輸入問題":"請輸入內容"; msgEl.focus(); return; }
         btn.disabled = true;
         try {
           const res = await fetch("/api/checkin", { method: "POST", headers: { "content-type": "application/json" },
-            body: JSON.stringify({ slug, name, message: msgEl ? msgEl.value.trim() : "", emoji: s.allowMessage ? chosenEmoji : "" }) });
-          if (!res.ok) throw new Error((await res.json()).error || "送出失敗");
+            body: JSON.stringify({ slug, name, message: msgEl ? msgEl.value.trim() : "", emoji: s.allowEmoji ? chosenEmoji : "" }) });
+          const data = await res.json();
+          if (!res.ok) throw new Error(data.error || "送出失敗");
           if (msgEl) msgEl.value = "";
-          nameEl.value = "";
+          if (s.mode === "checkin") { nameEl.value = ""; err.innerHTML = `<span style="color:var(--sage)">簽到成功 ✅</span>`; }
           refresh();
         } catch (e) { err.textContent = e.message; }
         finally { btn.disabled = false; }
@@ -175,26 +130,40 @@
       try {
         const res = await fetch(`/api/list?slug=${encodeURIComponent(slug)}`);
         const data = await res.json();
-        const countEl = document.getElementById("count");
-        if (countEl) countEl.textContent = String(data.count).padStart(2, "0");
-        const feed = document.getElementById("feed");
-        if (!feed) return;
+        const c = document.getElementById("count"); if (c) c.textContent = String(data.count).padStart(2, "0");
+        const feed = document.getElementById("feed"); if (!feed) return;
         const firstLoad = seen.size === 0;
-        const items = data.entries.slice().reverse(); // 最新在上
+        let items = data.entries.slice();
+        if (SESSION.mode === "qa") items.sort((a,b) => (b.votes||0)-(a.votes||0) || b.at-a.at);
+        else items.reverse();
         const total = items.length;
         feed.innerHTML = items.map((e, i) => {
           const isNew = !seen.has(e.id); seen.add(e.id);
-          const no = String(total - i).padStart(2, "0");
-          const color = ACCENT[(total - i - 1) % ACCENT.length];
-          return `<div class="entry ${isNew && !firstLoad ? "new" : ""}">
+          const no = String(SESSION.mode==="qa" ? i+1 : total - i).padStart(2, "0");
+          const color = ACCENT[i % ACCENT.length];
+          const voted = Array.isArray(e.voters) && e.voters.includes(clientId);
+          return `<div class="entry ${isNew && !firstLoad ? "flash" : ""}">
             <div class="no" style="color:${color}">${no}</div>
             <div>
-              <div class="meta"><span class="name" style="color:${color}">${escapeHtml(e.name)}</span><span class="time">${fmtTime(e.at)}</span></div>
+              <div class="meta"><span class="name" style="color:${color}">${escapeHtml(e.name)}</span>
+                ${SESSION.mode==="qa" && e.answered ? `<span class="answered">已回答</span>` : ``}
+                <span class="time">${fmtTime(e.at)}</span></div>
               ${e.message ? `<div class="msg">${escapeHtml(e.message)}</div>` : ""}
               ${e.emoji ? `<div class="emoji">${e.emoji}</div>` : ""}
+              ${SESSION.mode==="qa" ? `<button class="vote ${voted?"on":""}" data-id="${e.id}">👍 <b>${e.votes||0}</b></button>` : ""}
             </div>
           </div>`;
-        }).join("") || `<div class="center-msg">還沒有人留言，當第一筆吧。</div>`;
+        }).join("") || `<div class="center-msg">${SESSION.mode==="qa"?"還沒有問題，當第一個提問者。":"還沒有人，當第一筆吧。"}</div>`;
+
+        if (SESSION.mode === "qa") feed.querySelectorAll(".vote").forEach(b => b.onclick = () => doVote(b.dataset.id));
+      } catch {}
+    }
+
+    async function doVote(id) {
+      try {
+        await fetch("/api/vote", { method: "POST", headers: { "content-type": "application/json" },
+          body: JSON.stringify({ slug, id, clientId }) });
+        refresh();
       } catch {}
     }
 

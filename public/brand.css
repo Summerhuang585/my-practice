@@ -1,0 +1,70 @@
+/* Summer's Lab — 簽到牆共用品牌樣式 */
+:root {
+  --paper: #f3eee3;      /* 米白紙底 */
+  --paper2: #ece5d6;     /* 略深卡片底 */
+  --ink: #1c1b16;        /* 近黑 */
+  --muted: #8a8273;      /* 灰褐標籤色 */
+  --coral: #c0543d;      /* 珊瑚紅 主重點 */
+  --pink: #cf98ae;       /* 霧粉 */
+  --sage: #7f8a6f;       /* 橄欖綠 */
+  --navy: #232834;       /* 深墨 */
+  --rule: rgba(28,27,22,.18);
+  --serif: "Noto Serif TC", Georgia, "Songti TC", serif;
+  --display: "Playfair Display", "Noto Serif TC", Georgia, serif;
+  --mono: "Space Mono", ui-monospace, "Courier New", monospace;
+}
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--paper); color: var(--ink); font-family: var(--serif); -webkit-font-smoothing: antialiased; }
+
+/* 線條 / 刊頭 */
+.rule { height: 1px; background: var(--ink); }
+.rule.thin { background: var(--rule); }
+.kicker { display: flex; justify-content: space-between; align-items: baseline;
+  font-family: var(--mono); font-size: 11px; letter-spacing: 2px; text-transform: uppercase; color: var(--ink); padding: 8px 0; }
+.live { color: var(--coral); font-weight: 700; }
+.live::before { content: "●"; font-size: 8px; vertical-align: middle; margin-right: 5px; }
+.h-title { font-family: var(--display); font-weight: 900; line-height: .98; letter-spacing: -.5px; margin: 16px 0 8px;
+  font-size: clamp(36px, 8.5vw, 58px); }
+.dek { font-family: var(--display); font-style: italic; font-size: 18px; color: var(--muted); margin-bottom: 14px; }
+.badge { display: inline-block; font-family: var(--mono); font-size: 10px; letter-spacing: 1.5px; text-transform: uppercase;
+  border: 1px solid var(--ink); padding: 3px 8px; }
+
+/* 表單原子 */
+.flabel { display: block; font-family: var(--mono); font-size: 11px; letter-spacing: 2px; text-transform: uppercase; color: var(--muted); margin: 14px 0 4px; }
+.field input, .field textarea, input.line, textarea.line {
+  width: 100%; border: 0; border-bottom: 1.5px solid var(--ink); background: transparent; color: var(--ink);
+  font-family: var(--serif); font-size: 19px; padding: 8px 2px; outline: none; border-radius: 0; }
+.field textarea { resize: none; min-height: 42px; line-height: 1.5; }
+input::placeholder, textarea::placeholder { color: #b3ab98; }
+.field input:focus, .field textarea:focus { border-color: var(--coral); }
+.emojis { display: flex; gap: 8px; flex-wrap: wrap; margin: 14px 0 6px; }
+.emojis button { font-size: 19px; background: transparent; border: 1px solid var(--rule); width: 40px; height: 40px; cursor: pointer; padding: 0; line-height: 1; border-radius: 0; }
+.emojis button.on { border-color: var(--coral); background: var(--pink); }
+.btn { background: var(--coral); color: #fff; border: 0; border-radius: 0; padding: 13px 26px; cursor: pointer;
+  font-family: var(--mono); font-size: 13px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; }
+.btn:disabled { opacity: .55; }
+.btn.ghost { background: transparent; color: var(--ink); border: 1px solid var(--ink); }
+.err { color: var(--coral); font-size: 13px; font-family: var(--mono); }
+
+/* 計數列 */
+.count { display: flex; align-items: center; gap: 14px; margin: 28px 0 4px;
+  font-family: var(--mono); font-size: 12px; letter-spacing: 2px; text-transform: uppercase; }
+.count .ln { flex: 1; height: 1px; background: var(--ink); }
+.count b { font-family: var(--display); font-size: 20px; }
+
+/* 條目 */
+.entry { display: grid; grid-template-columns: 46px 1fr; gap: 14px; padding: 18px 0; border-top: 1px solid var(--rule); }
+.entry.flash { background: linear-gradient(90deg, rgba(192,84,61,.10), transparent 65%); }
+.entry .no { font-family: var(--display); font-weight: 700; font-size: 26px; line-height: 1; }
+.entry .meta { display: flex; align-items: baseline; gap: 10px; flex-wrap: wrap; }
+.entry .name { font-family: var(--mono); font-weight: 700; font-size: 13px; letter-spacing: 1px; text-transform: uppercase; }
+.entry .time { margin-left: auto; font-family: var(--mono); font-size: 11px; color: var(--muted); }
+.entry .msg { font-family: var(--serif); font-size: 19px; line-height: 1.55; margin-top: 8px; word-break: break-word; white-space: pre-wrap; }
+.entry .emoji { font-size: 20px; margin-top: 6px; }
+.answered { font-family: var(--mono); font-size: 10px; letter-spacing: 1px; text-transform: uppercase; color: var(--sage); border: 1px solid var(--sage); padding: 2px 6px; }
+.vote { display: inline-flex; align-items: center; gap: 6px; margin-top: 10px; cursor: pointer;
+  font-family: var(--mono); font-size: 13px; border: 1px solid var(--ink); background: transparent; color: var(--ink); padding: 5px 12px; border-radius: 999px; }
+.vote.on { background: var(--coral); border-color: var(--coral); color: #fff; }
+
+footer { margin-top: 38px; text-align: center; font-family: var(--mono); font-size: 10px; letter-spacing: 3px; text-transform: uppercase; color: var(--muted); }
+.center-msg { text-align: center; color: var(--muted); padding: 30px 0; font-family: var(--display); font-style: italic; font-size: 20px; }

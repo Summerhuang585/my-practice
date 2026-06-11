@@ -7,48 +7,30 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;0,900;1,500&family=Noto+Serif+TC:wght@400;600;900&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/brand.css">
   <style>
-    :root {
-      --blue: #144EA0; --pink: #CF98AE; --nylon: #131610;
-      --paper: #f4f2ea; --ink: #131610; --muted: #6f6a5d; --rule: rgba(19,22,16,.2);
-      --serif: "Noto Serif TC", Georgia, "Songti TC", serif;
-      --display: "Playfair Display", "Noto Serif TC", Georgia, serif;
-      --mono: "Space Mono", ui-monospace, "Courier New", monospace;
-    }
-    * { box-sizing: border-box; }
-    body { margin: 0; min-height: 100vh; background: var(--paper); color: var(--ink);
-      font-family: var(--serif); -webkit-font-smoothing: antialiased; padding: 30px 44px 40px; }
-
+    body { padding: 30px 44px 40px; }
     .masthead { border-top: 2px solid var(--ink); border-bottom: 1px solid var(--ink); padding: 8px 0 0; margin-bottom: 6px; }
-    .kicker { display: flex; justify-content: space-between; font-family: var(--mono); font-size: 13px;
-      letter-spacing: 3px; text-transform: uppercase; padding-bottom: 8px; }
-    .live { color: var(--blue); font-weight: 700; }
-    .live::before { content: "●"; font-size: 9px; vertical-align: middle; margin-right: 6px; }
-    h1 { font-family: var(--display); font-weight: 900; font-size: clamp(40px, 7vw, 92px); line-height: .95;
+    .masthead .kicker { font-size: 13px; letter-spacing: 3px; }
+    h1 { font-family: var(--display); font-weight: 900; font-size: clamp(40px, 7vw, 90px); line-height: .95;
       letter-spacing: -1px; margin: 6px 0 10px; text-align: center; }
     .subbar { display: flex; justify-content: center; gap: 16px; align-items: baseline; border-top: 1px solid var(--ink);
       padding: 8px 0; font-family: var(--mono); font-size: 14px; letter-spacing: 2px; text-transform: uppercase; }
-    .subbar b { font-family: var(--display); font-size: 22px; color: var(--blue); }
-
-    .feed { column-width: 300px; column-gap: 40px; margin-top: 22px; }
-    .entry { break-inside: avoid; display: grid; grid-template-columns: 52px 1fr; gap: 14px;
-      padding: 18px 0; border-top: 1px solid var(--rule); }
-    .entry.new { background: linear-gradient(90deg, rgba(20,78,160,.08), transparent 70%); }
-    .no { font-family: var(--display); font-weight: 700; font-size: 30px; line-height: 1; }
-    .meta { display: flex; align-items: baseline; gap: 10px; }
-    .name { font-family: var(--mono); font-weight: 700; font-size: 15px; letter-spacing: 1px; text-transform: uppercase; }
-    .time { margin-left: auto; font-family: var(--mono); font-size: 12px; color: var(--muted); }
-    .msg { font-family: var(--serif); font-size: 20px; line-height: 1.5; margin-top: 8px; word-break: break-word; white-space: pre-wrap; }
-    .emoji { font-size: 24px; margin-top: 8px; }
-    .empty { text-align: center; margin-top: 14vh; font-style: italic; color: var(--muted); font-family: var(--display); font-size: 26px; }
+    .subbar b { font-family: var(--display); font-size: 22px; color: var(--coral); }
+    .feed { column-width: 320px; column-gap: 40px; margin-top: 22px; }
+    .feed .entry { break-inside: avoid; }
+    .feed .entry .no { font-size: 30px; }
+    .feed .entry .name { font-size: 15px; }
+    .feed .entry .msg { font-size: 20px; }
+    .votes-badge { display:inline-flex; align-items:center; gap:5px; font-family: var(--mono); font-size: 14px; color: var(--coral); margin-top: 8px; }
     .hint { position: fixed; bottom: 10px; right: 18px; font-family: var(--mono); font-size: 11px; color: var(--muted); letter-spacing: 1px; }
   </style>
 </head>
 <body>
   <div class="masthead">
-    <div class="kicker"><span class="live">LIVE</span><span id="date"></span></div>
+    <div class="kicker"><span class="live">LIVE <span id="mode"></span></span><span id="date"></span></div>
     <h1 id="title">CHECK·IN WALL</h1>
-    <div class="subbar"><span>留言 Entries</span><b id="count">00</b></div>
+    <div class="subbar"><span id="countlabel">Entries</span><b id="count">00</b></div>
   </div>
   <div id="feed" class="feed"></div>
   <div class="hint">每 2 秒自動更新 · F11 全螢幕投影</div>
@@ -57,33 +39,46 @@
     const slug = decodeURIComponent((location.pathname.split("/wall/")[1] || "")).replace(/\/+$/,"");
     const feed = document.getElementById("feed");
     const seen = new Set();
-    const ACCENT = ["#144EA0", "#131610", "#CF98AE"];
+    const ACCENT = ["#c0543d", "#cf98ae", "#7f8a6f"];
+    let SESSION = null;
+    const MODE_LABEL = { checkin: "· 簽到", message: "· 留言", qa: "· Q&A" };
+    const COUNT_LABEL = { checkin: "Check-ins", message: "Entries", qa: "Questions" };
     document.getElementById("date").textContent = "CHECK·IN WALL — " +
       new Date().toLocaleDateString("en-US", { month: "short", day: "2-digit", year: "numeric" }).toUpperCase();
 
-    async function loadTitle() {
+    async function loadSession() {
       try { const r = await fetch(`/api/session?slug=${encodeURIComponent(slug)}`);
-        if (r.ok) { const s = await r.json(); document.getElementById("title").textContent = s.title; document.title = s.title + " · 簽到牆"; } } catch {}
+        if (r.ok) { SESSION = await r.json();
+          document.getElementById("title").textContent = SESSION.title;
+          document.getElementById("mode").textContent = MODE_LABEL[SESSION.mode] || "";
+          document.getElementById("countlabel").textContent = COUNT_LABEL[SESSION.mode] || "Entries";
+          document.title = SESSION.title + " · 簽到牆"; } } catch {}
     }
 
     async function refresh() {
+      if (!SESSION) return;
       try {
         const data = await (await fetch(`/api/list?slug=${encodeURIComponent(slug)}`)).json();
         document.getElementById("count").textContent = String(data.count).padStart(2, "0");
-        if (data.count === 0) { feed.innerHTML = `<div class="empty">等待第一筆簽到…</div>`; return; }
+        if (data.count === 0) { feed.innerHTML = `<div class="center-msg">等待第一筆…</div>`; return; }
         const firstLoad = seen.size === 0;
-        const items = data.entries.slice().reverse();
+        let items = data.entries.slice();
+        if (SESSION.mode === "qa") items.sort((a,b) => (b.votes||0)-(a.votes||0) || b.at-a.at);
+        else items.reverse();
         const total = items.length;
         feed.innerHTML = items.map((e, i) => {
           const isNew = !seen.has(e.id); seen.add(e.id);
-          const no = String(total - i).padStart(2, "0");
-          const color = ACCENT[(total - i - 1) % ACCENT.length];
-          return `<div class="entry ${isNew && !firstLoad ? "new" : ""}">
+          const no = String(SESSION.mode==="qa" ? i+1 : total - i).padStart(2, "0");
+          const color = ACCENT[i % ACCENT.length];
+          return `<div class="entry ${isNew && !firstLoad ? "flash" : ""}">
             <div class="no" style="color:${color}">${no}</div>
             <div>
-              <div class="meta"><span class="name" style="color:${color}">${escapeHtml(e.name)}</span><span class="time">${fmtTime(e.at)}</span></div>
+              <div class="meta"><span class="name" style="color:${color}">${escapeHtml(e.name)}</span>
+                ${SESSION.mode==="qa" && e.answered ? `<span class="answered">已回答</span>` : ``}
+                <span class="time">${fmtTime(e.at)}</span></div>
               ${e.message ? `<div class="msg">${escapeHtml(e.message)}</div>` : ""}
               ${e.emoji ? `<div class="emoji">${e.emoji}</div>` : ""}
+              ${SESSION.mode==="qa" ? `<div class="votes-badge">👍 ${e.votes||0}</div>` : ""}
             </div>
           </div>`;
         }).join("");
@@ -93,8 +88,8 @@
     function fmtTime(ms){ return new Date(ms).toLocaleTimeString("zh-TW",{hour:"2-digit",minute:"2-digit"}); }
     function escapeHtml(s){return String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));}
 
-    if (!slug) feed.innerHTML = `<div class="empty">網址缺少課程代碼</div>`;
-    else { loadTitle(); refresh(); setInterval(refresh, 2000); }
+    if (!slug) feed.innerHTML = `<div class="center-msg">網址缺少課程代碼</div>`;
+    else { loadSession().then(() => { refresh(); setInterval(refresh, 2000); }); }
   </script>
 </body>
 </html>

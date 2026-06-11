@@ -7,80 +7,86 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=Noto+Serif+TC:wght@400;600;900&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/brand.css">
   <script src="https://cdn.jsdelivr.net/gh/davidshimjs/qrcodejs@04f46c6a/qrcode.min.js"></script>
   <style>
-    :root {
-      --brand: #144EA0; --pink: #CF98AE; --ink: #131610; --paper: #f4f2ea;
-      --muted: #6f6a5d; --rule: rgba(19,22,16,.2);
-      --serif: "Noto Serif TC", Georgia, "Songti TC", serif;
-      --display: "Playfair Display", "Noto Serif TC", Georgia, serif;
-      --mono: "Space Mono", ui-monospace, "Courier New", monospace;
-    }
-    * { box-sizing: border-box; }
-    body { margin: 0; font-family: var(--serif); background: var(--paper); color: var(--ink); -webkit-font-smoothing: antialiased; }
-    .wrap { max-width: 760px; margin: 0 auto; padding: 30px 22px 60px; }
-    h1 { font-family: var(--display); font-weight: 900; font-size: 40px; letter-spacing: -.5px; margin: 4px 0 24px;
-      border-bottom: 2px solid var(--ink); padding-bottom: 12px; }
-    h2 { font-family: var(--display); font-weight: 700; font-size: 22px; }
-    .card { background: #fbfaf5; border: 1px solid var(--ink); border-radius: 0; padding: 22px; margin-bottom: 20px; }
-    label { display: block; font-family: var(--mono); font-weight: 700; font-size: 11px; letter-spacing: 2px; text-transform: uppercase; color: var(--muted); margin: 14px 0 6px; }
-    input[type=text] { width: 100%; padding: 9px 2px; border: 0; border-bottom: 1.5px solid var(--ink); background: transparent;
-      border-radius: 0; font-family: var(--serif); font-size: 18px; outline: none; }
-    input[type=text]:focus { border-color: var(--brand); }
-    .row { display: flex; align-items: center; gap: 8px; margin-top: 14px; font-family: var(--serif); font-size: 15px; text-transform: none; letter-spacing: 0; color: var(--ink); }
-    button { background: var(--brand); color: #fff; border: 0; padding: 12px 22px; border-radius: 0;
-      font-family: var(--mono); font-size: 12px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; cursor: pointer; }
-    button.ghost { background: transparent; color: var(--ink); border: 1px solid var(--ink); }
-    button.danger { background: transparent; color: #b3261e; border: 1px solid #b3261e; padding: 5px 10px; }
-    .links a { color: var(--brand); word-break: break-all; font-family: var(--mono); font-size: 13px; }
+    .wrap { max-width: 780px; margin: 0 auto; padding: 30px 22px 60px; }
+    h1.page { font-family: var(--display); font-weight: 900; font-size: 40px; margin: 4px 0 22px; border-bottom: 2px solid var(--ink); padding-bottom: 12px; }
+    h2 { font-family: var(--display); font-weight: 700; font-size: 22px; margin-top: 0; }
+    .card { background: #fbf8f0; border: 1px solid var(--ink); padding: 22px; margin-bottom: 20px; }
+    .modes { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; margin: 6px 0 4px; }
+    .modes label { display: block; border: 1px solid var(--rule); padding: 12px; cursor: pointer; }
+    .modes label.on { border-color: var(--coral); background: #fcefe9; }
+    .modes .mt { font-family: var(--mono); font-weight: 700; font-size: 12px; letter-spacing: 1px; text-transform: uppercase; }
+    .modes .md { font-size: 13px; color: var(--muted); margin-top: 4px; line-height: 1.4; }
+    .modes input { display: none; }
+    .opt { display: flex; align-items: center; gap: 8px; margin-top: 14px; font-size: 15px; }
     .links div { margin: 10px 0; font-size: 14px; }
-    .qr { text-align: center; margin: 18px 0; }
-    .qr #qrcode { display: inline-block; padding: 10px; background: #fff; border: 1px solid var(--ink); }
+    .links a { color: var(--coral); word-break: break-all; font-family: var(--mono); font-size: 13px; }
+    .qrbox { text-align: center; margin: 18px 0; }
+    .qrbox #qrcode { display: inline-block; padding: 10px; background: #fff; border: 1px solid var(--ink); }
     .muted { color: var(--muted); font-size: 13px; }
-    .err { color: #b3261e; font-size: 13px; font-family: var(--mono); }
     table { width: 100%; border-collapse: collapse; margin-top: 12px; }
-    th { font-family: var(--mono); font-size: 11px; letter-spacing: 1px; text-transform: uppercase; color: var(--muted); }
-    th, td { text-align: left; padding: 9px 6px; border-bottom: 1px solid var(--rule); font-size: 14px; }
-    .saved-item { display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 1px solid var(--rule); }
-    .saved-item a { color: var(--ink); text-decoration: none; font-weight: 600; font-family: var(--display); font-size: 17px; }
+    th { font-family: var(--mono); font-size: 11px; letter-spacing: 1px; text-transform: uppercase; color: var(--muted); text-align: left; }
+    th, td { padding: 9px 6px; border-bottom: 1px solid var(--rule); font-size: 14px; vertical-align: top; }
+    .saved-item { display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 1px solid var(--rule); gap: 8px; }
+    .saved-item a { color: var(--ink); text-decoration: none; font-family: var(--display); font-size: 17px; }
     .hide { display: none; }
-    .pill { display:inline-block; background:var(--pink); color:#fff; border-radius:0; padding:3px 10px; font-size:11px; font-family: var(--mono); letter-spacing: 1px; }
+    .pill { display:inline-block; background:var(--pink); color:#fff; padding:3px 9px; font-size:11px; font-family: var(--mono); letter-spacing: 1px; }
+    .small { padding: 6px 12px; font-size: 11px; }
+    .rowbtns { display: flex; gap: 6px; flex-wrap: wrap; }
   </style>
 </head>
 <body>
   <div class="wrap">
-    <h1>簽到牆 — 老師後台</h1>
+    <div class="kicker" style="border-top:2px solid var(--ink)"><span class="live">SUMMER'S LAB</span><span>CHECK·IN WALL · ADMIN</span></div>
+    <h1 class="page">簽到牆 — 老師後台</h1>
 
     <div class="card">
-      <h2 style="margin-top:0">建立新場次</h2>
-      <label>課程 / 活動名稱</label>
-      <input id="title" type="text" maxlength="60" placeholder="例如：Python 入門班 第 3 週" />
-      <label>自訂代碼（選填，英數與 -，留空會自動產生）</label>
-      <input id="code" type="text" maxlength="40" placeholder="例如：python-w3" />
-      <label class="row"><input id="allowMessage" type="checkbox" checked /> 允許學員留言 / 寫打卡心得</label>
-      <div style="margin-top:16px"><button id="create">建立場次</button></div>
-      <div id="createErr" class="err"></div>
+      <h2>建立新場次</h2>
+      <label class="flabel">名稱</label>
+      <div class="field"><input id="title" type="text" maxlength="60" placeholder="例如：AI 工作坊 第 3 場" /></div>
+      <label class="flabel">自訂代碼（選填，英數與 -，留空自動產生）</label>
+      <div class="field"><input id="code" type="text" maxlength="40" placeholder="例如：ai-w3" /></div>
+
+      <label class="flabel" style="margin-top:18px">模式</label>
+      <div class="modes" id="modes">
+        <label data-mode="checkin" class="on"><input type="radio" name="mode" value="checkin" checked />
+          <div class="mt">🟢 簽到</div><div class="md">實名・防同名・可匯出名單</div></label>
+        <label data-mode="message"><input type="radio" name="mode" value="message" />
+          <div class="mt">💬 留言</div><div class="md">打招呼・可匿名・可加 emoji</div></label>
+        <label data-mode="qa"><input type="radio" name="mode" value="qa" />
+          <div class="mt">❓ Q&A</div><div class="md">提問・可匿名・按讚排序・標記已回答</div></label>
+      </div>
+
+      <div class="opt hide" id="optAnon"><input id="allowAnonymous" type="checkbox" /> <span>允許匿名（學員可不填名字）</span></div>
+      <div class="opt hide" id="optEmoji"><input id="allowEmoji" type="checkbox" checked /> <span>允許學員選 emoji 心情</span></div>
+
+      <div style="margin-top:20px"><button class="btn" id="create">建立場次</button></div>
+      <div id="createErr" class="err" style="margin-top:8px"></div>
     </div>
 
     <div id="result" class="card hide">
-      <h2 style="margin-top:0">✅ 場次已建立：<span id="rTitle"></span></h2>
+      <h2>✅ 已建立：<span id="rTitle"></span> <span class="pill" id="rMode"></span></h2>
       <div class="links">
-        <div>👉 <b>學員簽到連結</b>（把它或下方 QR 給學員）：<br><a id="studentLink" target="_blank"></a> <button class="ghost" data-copy="studentLink">複製</button></div>
-        <div>📺 <b>投影牆連結</b>（自己開、投影到大螢幕）：<br><a id="wallLink" target="_blank"></a> <button class="ghost" data-copy="wallLink">複製</button></div>
+        <div>👉 <b>學員連結</b>（給學員 / QR）：<br><a id="studentLink" target="_blank"></a> <button class="btn ghost small" data-copy="studentLink">複製</button></div>
+        <div>📺 <b>投影牆</b>（投大螢幕）：<br><a id="wallLink" target="_blank"></a> <button class="btn ghost small" data-copy="wallLink">複製</button></div>
+        <div>📌 <b>角落即時（常駐小視窗）</b>：<br><a id="tickLink" target="_blank"></a> <button class="btn ghost small" data-copy="tickLink">複製</button></div>
+        <div>🎬 <b>OBS 透明疊加</b>（browser source）：<br><a id="obsLink" target="_blank"></a> <button class="btn ghost small" data-copy="obsLink">複製</button></div>
       </div>
-      <div class="qr"><div id="qrcode"></div><div class="muted">學員掃這個 QR Code 就能簽到</div></div>
-      <p class="muted">⚠️ 這個場次的管理權限存在你的瀏覽器裡。下次回來這個頁面就能看到並管理它。</p>
+      <div class="qrbox"><div id="qrcode"></div><div class="muted">學員掃這個 QR 即可加入</div></div>
+      <p class="muted">⚠️ 管理權限存在你這台瀏覽器裡，下次回來此頁就能管理。</p>
     </div>
 
     <div class="card">
-      <h2 style="margin-top:0">我建立過的場次</h2>
+      <h2>我建立過的場次</h2>
       <div id="savedList"><span class="muted">尚無紀錄</span></div>
     </div>
 
     <div id="manage" class="card hide">
-      <h2 style="margin-top:0">管理：<span id="mTitle"></span> <span class="pill" id="mCount">0 人</span></h2>
-      <div class="muted">每 3 秒自動更新。可刪除不當的簽到。</div>
-      <table><thead><tr><th>名字</th><th>留言</th><th>時間</th><th></th></tr></thead><tbody id="mBody"></tbody></table>
+      <h2>管理：<span id="mTitle"></span> <span class="pill" id="mCount">0</span></h2>
+      <div style="margin:6px 0 4px"><button class="btn ghost small" id="exportBtn">⬇ 匯出 CSV 名單</button></div>
+      <table><thead><tr><th>#</th><th>名字</th><th>內容</th><th id="thExtra"></th><th>時間</th><th></th></tr></thead><tbody id="mBody"></tbody></table>
     </div>
   </div>
 
@@ -88,106 +94,114 @@
     const KEY = "checkin-wall-sessions";
     const base = location.origin;
     let manageTimer = null;
+    const MODE_NAME = { checkin: "簽到", message: "留言", qa: "Q&A" };
+
+    // 模式切換 UI
+    document.querySelectorAll('#modes label').forEach(l => l.onclick = () => {
+      document.querySelectorAll('#modes label').forEach(x => x.classList.remove('on'));
+      l.classList.add('on'); l.querySelector('input').checked = true;
+      const m = l.dataset.mode;
+      document.getElementById('optAnon').classList.toggle('hide', m === 'checkin');
+      document.getElementById('optEmoji').classList.toggle('hide', m !== 'message');
+    });
 
     function getSaved() { try { return JSON.parse(localStorage.getItem(KEY) || "[]"); } catch { return []; } }
-    function saveSession(s) {
-      const list = getSaved().filter(x => x.slug !== s.slug);
-      list.unshift(s);
-      localStorage.setItem(KEY, JSON.stringify(list));
-    }
+    function saveSession(s) { const list = getSaved().filter(x => x.slug !== s.slug); list.unshift(s); localStorage.setItem(KEY, JSON.stringify(list)); }
 
     document.getElementById("create").onclick = async () => {
       const title = document.getElementById("title").value.trim();
       const code = document.getElementById("code").value.trim();
-      const allowMessage = document.getElementById("allowMessage").checked;
-      const err = document.getElementById("createErr");
-      err.textContent = "";
-      if (!title) { err.textContent = "請填寫課程名稱"; return; }
+      const mode = document.querySelector('input[name=mode]:checked').value;
+      const allowAnonymous = document.getElementById("allowAnonymous").checked;
+      const allowEmoji = document.getElementById("allowEmoji").checked;
+      const err = document.getElementById("createErr"); err.textContent = "";
+      if (!title) { err.textContent = "請填寫名稱"; return; }
       try {
-        const res = await fetch("/api/session", {
-          method: "POST", headers: { "content-type": "application/json" },
-          body: JSON.stringify({ title, code, allowMessage }),
-        });
+        const res = await fetch("/api/session", { method: "POST", headers: { "content-type": "application/json" },
+          body: JSON.stringify({ title, code, mode, allowAnonymous, allowEmoji }) });
         const data = await res.json();
         if (!res.ok) throw new Error(data.error || "建立失敗");
-        saveSession(data);
-        showResult(data);
-        renderSaved();
-        openManage(data);
+        saveSession(data); showResult(data); renderSaved(); openManage(data);
       } catch (e) { err.textContent = e.message; }
     };
 
     function showResult(s) {
-      const studentUrl = `${base}/s/${s.slug}`;
-      const wallUrl = `${base}/wall/${s.slug}`;
+      const studentUrl = `${base}/s/${s.slug}`, wallUrl = `${base}/wall/${s.slug}`, tickUrl = `${base}/ticker/${s.slug}`, obsUrl = `${base}/ticker/${s.slug}?transparent=1`;
       document.getElementById("rTitle").textContent = s.title;
-      const a = document.getElementById("studentLink"); a.href = studentUrl; a.textContent = studentUrl;
-      const w = document.getElementById("wallLink"); w.href = wallUrl; w.textContent = wallUrl;
+      document.getElementById("rMode").textContent = MODE_NAME[s.mode];
+      setLink("studentLink", studentUrl); setLink("wallLink", wallUrl); setLink("tickLink", tickUrl); setLink("obsLink", obsUrl);
       const qr = document.getElementById("qrcode"); qr.innerHTML = "";
-      if (window.QRCode) new QRCode(qr, { text: studentUrl, width: 200, height: 200, colorDark: "#131610" });
+      if (window.QRCode) new QRCode(qr, { text: studentUrl, width: 190, height: 190, colorDark: "#1c1b16" });
       document.getElementById("result").classList.remove("hide");
     }
+    function setLink(id, url) { const a = document.getElementById(id); a.href = url; a.textContent = url; }
 
-    document.querySelectorAll("[data-copy]").forEach(b => {
-      b.onclick = () => {
-        const t = document.getElementById(b.dataset.copy).textContent;
-        navigator.clipboard.writeText(t); b.textContent = "已複製!"; setTimeout(() => b.textContent = "複製", 1200);
-      };
+    document.querySelectorAll("[data-copy]").forEach(b => b.onclick = () => {
+      navigator.clipboard.writeText(document.getElementById(b.dataset.copy).textContent);
+      const t = b.textContent; b.textContent = "已複製!"; setTimeout(() => b.textContent = t, 1200);
     });
 
     function renderSaved() {
-      const list = getSaved();
-      const el = document.getElementById("savedList");
+      const list = getSaved(); const el = document.getElementById("savedList");
       if (!list.length) { el.innerHTML = `<span class="muted">尚無紀錄</span>`; return; }
       el.innerHTML = list.map(s => `
         <div class="saved-item">
-          <div><a href="/wall/${s.slug}" target="_blank">${escapeHtml(s.title)}</a> <span class="muted">/s/${escapeHtml(s.slug)}</span></div>
-          <div>
-            <button class="ghost" onclick='manageBy("${s.slug}")'>管理</button>
-            <button class="ghost" onclick='reshow("${s.slug}")'>連結/QR</button>
+          <div><a href="/wall/${s.slug}" target="_blank">${escapeHtml(s.title)}</a> <span class="muted">${MODE_NAME[s.mode]||""} · /s/${escapeHtml(s.slug)}</span></div>
+          <div class="rowbtns">
+            <button class="btn ghost small" onclick='manageBy("${s.slug}")'>管理</button>
+            <button class="btn ghost small" onclick='reshow("${s.slug}")'>連結/QR</button>
           </div>
         </div>`).join("");
     }
-
     window.reshow = (slug) => { const s = getSaved().find(x => x.slug === slug); if (s) { showResult(s); window.scrollTo({top:0,behavior:"smooth"}); } };
     window.manageBy = (slug) => { const s = getSaved().find(x => x.slug === slug); if (s) openManage(s); };
 
     function openManage(s) {
       document.getElementById("mTitle").textContent = s.title;
+      document.getElementById("thExtra").textContent = s.mode === "qa" ? "讚 / 已回答" : "";
+      document.getElementById("exportBtn").onclick = () => location.href = `/api/export?slug=${encodeURIComponent(s.slug)}&token=${encodeURIComponent(s.adminToken)}`;
       document.getElementById("manage").classList.remove("hide");
       document.getElementById("manage").scrollIntoView({ behavior: "smooth" });
       if (manageTimer) clearInterval(manageTimer);
-      const tick = () => loadManage(s);
-      tick(); manageTimer = setInterval(tick, 3000);
+      const tick = () => loadManage(s); tick(); manageTimer = setInterval(tick, 3000);
     }
 
     async function loadManage(s) {
       try {
-        const res = await fetch(`/api/list?slug=${encodeURIComponent(s.slug)}`);
-        const data = await res.json();
-        document.getElementById("mCount").textContent = data.count + " 人";
-        const rows = data.entries.slice().reverse();
-        document.getElementById("mBody").innerHTML = rows.map(e => `
+        const data = await (await fetch(`/api/list?slug=${encodeURIComponent(s.slug)}`)).json();
+        document.getElementById("mCount").textContent = data.count + (s.mode==="checkin"?" 人":" 則");
+        let rows = data.entries.slice();
+        if (s.mode === "qa") rows.sort((a,b) => (b.votes||0)-(a.votes||0) || b.at-a.at); else rows.reverse();
+        document.getElementById("mBody").innerHTML = rows.map((e, i) => `
           <tr>
+            <td>${i+1}</td>
             <td>${escapeHtml(e.name)}</td>
-            <td>${escapeHtml(e.message || "")}</td>
+            <td>${escapeHtml(e.message || "")} ${e.emoji||""}</td>
+            <td>${s.mode==="qa" ? `👍${e.votes||0} ${e.answered?'<span class="answered">已回答</span>':''}` : ""}</td>
             <td class="muted">${new Date(e.at).toLocaleTimeString("zh-TW")}</td>
-            <td><button class="danger" onclick='del("${s.slug}","${e.id}")'>刪除</button></td>
-          </tr>`).join("") || `<tr><td colspan="4" class="muted">還沒有人簽到</td></tr>`;
+            <td><div class="rowbtns">
+              ${s.mode==="qa" ? `<button class="btn ghost small" onclick='toggleAns("${s.slug}","${e.id}",${e.answered?"false":"true"})'>${e.answered?"設未回答":"標已回答"}</button>` : ""}
+              <button class="btn ghost small" onclick='del("${s.slug}","${e.id}")'>刪除</button>
+            </div></td>
+          </tr>`).join("") || `<tr><td colspan="6" class="muted">還沒有資料</td></tr>`;
       } catch {}
     }
 
+    window.toggleAns = async (slug, id, answered) => {
+      const s = getSaved().find(x => x.slug === slug); if (!s) return;
+      await fetch("/api/answer", { method: "POST", headers: { "content-type": "application/json" },
+        body: JSON.stringify({ slug, id, adminToken: s.adminToken, answered }) });
+      loadManage(s);
+    };
     window.del = async (slug, id) => {
-      const s = getSaved().find(x => x.slug === slug);
-      if (!s) return;
-      if (!confirm("確定刪除這筆簽到？")) return;
+      const s = getSaved().find(x => x.slug === slug); if (!s) return;
+      if (!confirm("確定刪除這筆？")) return;
       await fetch("/api/remove", { method: "POST", headers: { "content-type": "application/json" },
         body: JSON.stringify({ slug, id, adminToken: s.adminToken }) });
       loadManage(s);
     };
 
     function escapeHtml(s){return String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));}
-
     renderSaved();
   </script>
 </body>

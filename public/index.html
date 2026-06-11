@@ -3,50 +3,40 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>課程簽到牆</title>
+  <title>課程簽到牆 · Summer's Lab</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;0,900;1,500&family=Noto+Serif+TC:wght@400;600;900&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/brand.css">
   <style>
-    :root {
-      --blue: #144EA0; --pink: #CF98AE; --ink: #131610; --paper: #f4f2ea; --muted: #6f6a5d;
-      --serif: "Noto Serif TC", Georgia, "Songti TC", serif;
-      --display: "Playfair Display", "Noto Serif TC", Georgia, serif;
-      --mono: "Space Mono", ui-monospace, "Courier New", monospace;
-    }
-    * { box-sizing: border-box; }
-    body { margin: 0; min-height: 100vh; background: var(--paper); color: var(--ink); font-family: var(--serif);
-      -webkit-font-smoothing: antialiased; display: flex; align-items: center; justify-content: center; padding: 28px; }
+    body { display: flex; align-items: center; justify-content: center; min-height: 100vh; padding: 28px; }
     .cover { max-width: 600px; width: 100%; }
-    .kicker { display: flex; justify-content: space-between; font-family: var(--mono); font-size: 12px;
-      letter-spacing: 3px; text-transform: uppercase; border-top: 2px solid var(--ink); border-bottom: 1px solid var(--ink); padding: 8px 0; }
-    .kicker .b { color: var(--blue); }
-    h1 { font-family: var(--display); font-weight: 900; font-size: clamp(46px, 12vw, 80px); line-height: .96;
-      letter-spacing: -1px; margin: 24px 0 10px; }
-    .dek { font-family: var(--display); font-style: italic; font-size: 20px; color: var(--muted); margin-bottom: 26px; }
-    a.btn { display: inline-block; background: var(--blue); color: #fff; text-decoration: none; padding: 15px 30px;
+    .topbar { display: flex; justify-content: space-between; border-top: 2px solid var(--ink); border-bottom: 1px solid var(--ink);
+      padding: 8px 0; font-family: var(--mono); font-size: 12px; letter-spacing: 3px; text-transform: uppercase; }
+    .topbar .b { color: var(--coral); }
+    h1 { font-family: var(--display); font-weight: 900; font-size: clamp(46px, 12vw, 78px); line-height: .96; letter-spacing: -1px; margin: 24px 0 10px; }
+    .lead { font-family: var(--display); font-style: italic; font-size: 20px; color: var(--muted); margin-bottom: 24px; }
+    a.cta { display: inline-block; background: var(--coral); color: #fff; text-decoration: none; padding: 15px 30px;
       font-family: var(--mono); font-size: 13px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; }
-    .steps { margin-top: 30px; border-top: 1px solid var(--ink); }
-    .steps .s { display: grid; grid-template-columns: 40px 1fr; gap: 14px; padding: 14px 0; border-bottom: 1px solid rgba(19,22,16,.2); }
-    .steps .n { font-family: var(--display); font-weight: 700; font-size: 22px; }
-    .steps .t { font-size: 15px; line-height: 1.5; }
-    .steps .n.b1 { color: var(--blue); } .steps .n.b2 { color: var(--pink); } .steps .n.b3 { color: var(--ink); } .steps .n.b4 { color: var(--blue); }
-    footer { margin-top: 26px; font-family: var(--mono); font-size: 10px; letter-spacing: 3px; text-transform: uppercase; color: var(--muted); }
+    .modes3 { margin-top: 30px; border-top: 1px solid var(--ink); }
+    .m { display: grid; grid-template-columns: 36px 1fr; gap: 14px; padding: 14px 0; border-bottom: 1px solid var(--rule); }
+    .m .ic { font-family: var(--display); font-weight: 700; font-size: 20px; }
+    .m .tx b { font-family: var(--mono); font-size: 12px; letter-spacing: 1px; text-transform: uppercase; }
+    .m .tx div { font-size: 14px; color: var(--muted); margin-top: 2px; }
   </style>
 </head>
 <body>
   <div class="cover">
-    <div class="kicker"><span class="b">● Check·in Wall</span><span>Issue 課程</span></div>
+    <div class="topbar"><span class="b">● Summer's Lab</span><span>Check·in Wall</span></div>
     <h1>課程<br>簽到牆</h1>
-    <div class="dek">學員掃 QR 輸入名字，即時上牆，投影到大螢幕。</div>
-    <a class="btn" href="/admin.html">老師：建立簽到場次 →</a>
-    <div class="steps">
-      <div class="s"><div class="n b1">01</div><div class="t">到「老師後台」建立一個場次，取得學員連結與 QR Code。</div></div>
-      <div class="s"><div class="n b2">02</div><div class="t">把 QR Code（或 <b>/s/代碼</b> 連結）給學員。</div></div>
-      <div class="s"><div class="n b3">03</div><div class="t">自己開投影牆 <b>/wall/代碼</b>，投影到大螢幕。</div></div>
-      <div class="s"><div class="n b4">04</div><div class="t">學員簽到，名字即時出現在牆上。</div></div>
+    <div class="lead">學員掃 QR、即時上牆，投影到大螢幕。一個工具，三種模式。</div>
+    <a class="cta" href="/admin.html">老師：建立場次 →</a>
+    <div class="modes3">
+      <div class="m"><div class="ic" style="color:var(--coral)">01</div><div class="tx"><b>🟢 簽到</b><div>實名・防同名・可匯出 CSV 名單</div></div></div>
+      <div class="m"><div class="ic" style="color:var(--pink)">02</div><div class="tx"><b>💬 留言</b><div>打招呼破冰・可匿名・emoji 心情</div></div></div>
+      <div class="m"><div class="ic" style="color:var(--sage)">03</div><div class="tx"><b>❓ Q&A</b><div>收問題・可匿名・按讚排序・標記已回答</div></div></div>
     </div>
-    <footer>✦ ✦ ✦</footer>
+    <footer>✦ Summer's Lab · Check·in Wall ✦</footer>
   </div>
 </body>
 </html>

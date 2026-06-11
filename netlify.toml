@@ -22,3 +22,9 @@
   from = "/wall/*"
   to = "/wall.html"
   status = 200
+
+# 角落即時模式：/ticker/課程代碼 → 顯示 ticker.html
+[[redirects]]
+  from = "/ticker/*"
+  to = "/ticker.html"
+  status = 200
