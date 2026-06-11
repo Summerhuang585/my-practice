@@ -4,57 +4,62 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>簽到牆</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;0,900;1,500&family=Noto+Serif+TC:wght@400;600;900&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
   <style>
     :root {
       --blue: #144EA0; --pink: #CF98AE; --nylon: #131610;
-      --paper: #fbfaf7; --line: #e4e2db; --ink: #131610;
+      --paper: #f4f2ea; --ink: #131610; --muted: #6f6a5d; --rule: rgba(19,22,16,.2);
+      --serif: "Noto Serif TC", Georgia, "Songti TC", serif;
+      --display: "Playfair Display", "Noto Serif TC", Georgia, serif;
+      --mono: "Space Mono", ui-monospace, "Courier New", monospace;
     }
     * { box-sizing: border-box; }
-    body { margin: 0; min-height: 100vh; background: var(--nylon); color: #fff;
-      font-family: system-ui, "PingFang TC", "Microsoft JhengHei", sans-serif; padding: 24px 30px; }
-    header { text-align: center; margin-bottom: 22px; }
-    .live { display: inline-block; background: var(--blue); color: #fff; font-size: 13px; font-weight: 800;
-      letter-spacing: 1.5px; padding: 4px 12px; border-radius: 7px; }
-    .live::before { content: "● "; font-size: 10px; }
-    h1 { margin: 10px 0 4px; font-size: clamp(28px, 4vw, 52px); font-weight: 900; letter-spacing: 1px; }
-    .count { color: #b9b6ad; font-size: clamp(15px, 1.6vw, 22px); }
-    .count b { color: var(--pink); font-size: 1.3em; }
+    body { margin: 0; min-height: 100vh; background: var(--paper); color: var(--ink);
+      font-family: var(--serif); -webkit-font-smoothing: antialiased; padding: 30px 44px 40px; }
 
-    .feed { column-width: 280px; column-gap: 16px; }
-    .item { break-inside: avoid; background: var(--paper); color: var(--ink); border: 1.5px solid var(--line);
-      border-radius: 14px; padding: 16px 18px; margin-bottom: 16px; animation: pop .45s ease; }
-    .item.new { box-shadow: 0 0 0 2px var(--blue), 0 8px 26px rgba(20,78,160,.5); }
-    @keyframes pop { from { opacity: 0; transform: translateY(12px) scale(.97); } to { opacity: 1; transform: none; } }
-    .head { display: flex; align-items: center; gap: 9px; }
-    .avatar { width: 28px; height: 28px; border-radius: 50%; color: #fff; font-size: 14px; font-weight: 800;
-      display: flex; align-items: center; justify-content: center; flex: 0 0 auto; }
-    .name { font-weight: 800; font-size: 18px; }
-    .time { margin-left: auto; color: #9b988f; font-size: 13px; }
-    .message { margin-top: 9px; font-size: 17px; line-height: 1.6; word-break: break-word; white-space: pre-wrap; }
+    .masthead { border-top: 2px solid var(--ink); border-bottom: 1px solid var(--ink); padding: 8px 0 0; margin-bottom: 6px; }
+    .kicker { display: flex; justify-content: space-between; font-family: var(--mono); font-size: 13px;
+      letter-spacing: 3px; text-transform: uppercase; padding-bottom: 8px; }
+    .live { color: var(--blue); font-weight: 700; }
+    .live::before { content: "●"; font-size: 9px; vertical-align: middle; margin-right: 6px; }
+    h1 { font-family: var(--display); font-weight: 900; font-size: clamp(40px, 7vw, 92px); line-height: .95;
+      letter-spacing: -1px; margin: 6px 0 10px; text-align: center; }
+    .subbar { display: flex; justify-content: center; gap: 16px; align-items: baseline; border-top: 1px solid var(--ink);
+      padding: 8px 0; font-family: var(--mono); font-size: 14px; letter-spacing: 2px; text-transform: uppercase; }
+    .subbar b { font-family: var(--display); font-size: 22px; color: var(--blue); }
+
+    .feed { column-width: 300px; column-gap: 40px; margin-top: 22px; }
+    .entry { break-inside: avoid; display: grid; grid-template-columns: 52px 1fr; gap: 14px;
+      padding: 18px 0; border-top: 1px solid var(--rule); }
+    .entry.new { background: linear-gradient(90deg, rgba(20,78,160,.08), transparent 70%); }
+    .no { font-family: var(--display); font-weight: 700; font-size: 30px; line-height: 1; }
+    .meta { display: flex; align-items: baseline; gap: 10px; }
+    .name { font-family: var(--mono); font-weight: 700; font-size: 15px; letter-spacing: 1px; text-transform: uppercase; }
+    .time { margin-left: auto; font-family: var(--mono); font-size: 12px; color: var(--muted); }
+    .msg { font-family: var(--serif); font-size: 20px; line-height: 1.5; margin-top: 8px; word-break: break-word; white-space: pre-wrap; }
     .emoji { font-size: 24px; margin-top: 8px; }
-    .empty { text-align: center; margin-top: 16vh; color: #b9b6ad; }
-    .empty .big { font-size: 64px; }
-    .hint { position: fixed; bottom: 10px; right: 16px; color: #6f6c64; font-size: 12px; }
+    .empty { text-align: center; margin-top: 14vh; font-style: italic; color: var(--muted); font-family: var(--display); font-size: 26px; }
+    .hint { position: fixed; bottom: 10px; right: 18px; font-family: var(--mono); font-size: 11px; color: var(--muted); letter-spacing: 1px; }
   </style>
 </head>
 <body>
-  <header>
-    <div class="live">LIVE</div>
-    <h1 id="title">簽到牆</h1>
-    <div class="count">目前 <b id="count">0</b> 則留言</div>
-  </header>
+  <div class="masthead">
+    <div class="kicker"><span class="live">LIVE</span><span id="date"></span></div>
+    <h1 id="title">CHECK·IN WALL</h1>
+    <div class="subbar"><span>留言 Entries</span><b id="count">00</b></div>
+  </div>
   <div id="feed" class="feed"></div>
-  <div class="hint">每 2 秒自動更新 · 按 F11 全螢幕投影</div>
+  <div class="hint">每 2 秒自動更新 · F11 全螢幕投影</div>
 
   <script>
     const slug = decodeURIComponent((location.pathname.split("/wall/")[1] || "")).replace(/\/+$/,"");
     const feed = document.getElementById("feed");
     const seen = new Set();
-    const PALETTE = [
-      { bg: "#144EA0", fg: "#144EA0" },
-      { bg: "#CF98AE", fg: "#a85f80" },
-      { bg: "#131610", fg: "#131610" },
-    ];
+    const ACCENT = ["#144EA0", "#131610", "#CF98AE"];
+    document.getElementById("date").textContent = "CHECK·IN WALL — " +
+      new Date().toLocaleDateString("en-US", { month: "short", day: "2-digit", year: "numeric" }).toUpperCase();
 
     async function loadTitle() {
       try { const r = await fetch(`/api/session?slug=${encodeURIComponent(slug)}`);
@@ -64,26 +69,28 @@
     async function refresh() {
       try {
         const data = await (await fetch(`/api/list?slug=${encodeURIComponent(slug)}`)).json();
-        document.getElementById("count").textContent = data.count;
-        if (data.count === 0) { feed.innerHTML = `<div class="empty"><div class="big">👋</div><div>等待第一位簽到…</div></div>`; return; }
+        document.getElementById("count").textContent = String(data.count).padStart(2, "0");
+        if (data.count === 0) { feed.innerHTML = `<div class="empty">等待第一筆簽到…</div>`; return; }
         const firstLoad = seen.size === 0;
-        feed.innerHTML = data.entries.slice().reverse().map(e => {
+        const items = data.entries.slice().reverse();
+        const total = items.length;
+        feed.innerHTML = items.map((e, i) => {
           const isNew = !seen.has(e.id); seen.add(e.id);
-          const c = PALETTE[hash(e.name) % PALETTE.length];
-          const ch = (e.name[0] || "?").toUpperCase();
-          return `<div class="item ${isNew && !firstLoad ? "new" : ""}">
-            <div class="head"><span class="avatar" style="background:${c.bg}">${escapeHtml(ch)}</span>
-              <span class="name" style="color:${c.fg}">${escapeHtml(e.name)}</span>
-              <span class="time">${fmtTime(e.at)}</span></div>
-            ${e.message ? `<div class="message">${escapeHtml(e.message)}</div>` : ""}
-            ${e.emoji ? `<div class="emoji">${e.emoji}</div>` : ""}
+          const no = String(total - i).padStart(2, "0");
+          const color = ACCENT[(total - i - 1) % ACCENT.length];
+          return `<div class="entry ${isNew && !firstLoad ? "new" : ""}">
+            <div class="no" style="color:${color}">${no}</div>
+            <div>
+              <div class="meta"><span class="name" style="color:${color}">${escapeHtml(e.name)}</span><span class="time">${fmtTime(e.at)}</span></div>
+              ${e.message ? `<div class="msg">${escapeHtml(e.message)}</div>` : ""}
+              ${e.emoji ? `<div class="emoji">${e.emoji}</div>` : ""}
+            </div>
           </div>`;
         }).join("");
       } catch {}
     }
 
     function fmtTime(ms){ return new Date(ms).toLocaleTimeString("zh-TW",{hour:"2-digit",minute:"2-digit"}); }
-    function hash(s){let h=0;for(let i=0;i<s.length;i++)h=(h*31+s.charCodeAt(i))>>>0;return h;}
     function escapeHtml(s){return String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));}
 
     if (!slug) feed.innerHTML = `<div class="empty">網址缺少課程代碼</div>`;
