@@ -1,0 +1,24 @@
+[build]
+  publish = "public"
+  functions = "netlify/functions"
+
+[functions]
+  node_bundler = "esbuild"
+
+# 把 /api/xxx 轉到對應的 serverless function
+[[redirects]]
+  from = "/api/*"
+  to = "/.netlify/functions/:splat"
+  status = 200
+
+# 學員簽到頁：/s/課程代碼  → 顯示 checkin.html（網址保持不變）
+[[redirects]]
+  from = "/s/*"
+  to = "/checkin.html"
+  status = 200
+
+# 投影牆：/wall/課程代碼 → 顯示 wall.html
+[[redirects]]
+  from = "/wall/*"
+  to = "/wall.html"
+  status = 200

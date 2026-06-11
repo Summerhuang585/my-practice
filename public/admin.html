@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>老師後台 · 簽到牆</title>
+  <script src="https://cdn.jsdelivr.net/gh/davidshimjs/qrcodejs@04f46c6a/qrcode.min.js"></script>
+  <style>
+    :root { --brand: #144EA0; }
+    * { box-sizing: border-box; }
+    body { margin: 0; font-family: system-ui, "PingFang TC", "Microsoft JhengHei", sans-serif; background: #e9e7e1; color: #131610; }
+    .wrap { max-width: 760px; margin: 0 auto; padding: 28px 18px 60px; }
+    h1 { font-size: 24px; }
+    .card { background: #ffffff; border: 1.5px solid #dcdad3; border-radius: 16px; padding: 22px; box-shadow: 0 6px 24px rgba(0,0,0,.05); margin-bottom: 20px; }
+    label { display: block; font-weight: 600; font-size: 14px; margin: 12px 0 6px; }
+    input[type=text] { width: 100%; padding: 11px 13px; border: 1.5px solid #e2e8f0; border-radius: 10px; font-size: 15px; }
+    .row { display: flex; align-items: center; gap: 8px; margin-top: 12px; font-size: 14px; }
+    button { background: var(--brand); color: #fff; border: 0; padding: 12px 18px; border-radius: 10px; font-size: 15px; font-weight: 700; cursor: pointer; }
+    button.ghost { background: #e2e8f0; color: #334155; }
+    button.danger { background: #fee2e2; color: #b91c1c; padding: 6px 10px; font-size: 13px; }
+    .links a { color: var(--brand); word-break: break-all; }
+    .links div { margin: 8px 0; font-size: 14px; }
+    .qr { text-align: center; margin: 16px 0; }
+    .qr #qrcode { display: inline-block; padding: 12px; background: #fff; border: 1px solid #e2e8f0; border-radius: 12px; }
+    .muted { color: #64748b; font-size: 13px; }
+    .err { color: #dc2626; font-size: 14px; }
+    table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+    th, td { text-align: left; padding: 8px 6px; border-bottom: 1px solid #eef2f7; font-size: 14px; }
+    .saved-item { display: flex; justify-content: space-between; align-items: center; padding: 8px 0; border-bottom: 1px solid #eef2f7; }
+    .saved-item a { color: var(--brand); text-decoration: none; font-weight: 600; }
+    .hide { display: none; }
+    .pill { display:inline-block; background:#fbeef4; color:#a85f80; border-radius:999px; padding:3px 10px; font-size:12px; }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <h1>📋 簽到牆 · 老師後台</h1>
+
+    <div class="card">
+      <h2 style="margin-top:0">建立新場次</h2>
+      <label>課程 / 活動名稱</label>
+      <input id="title" type="text" maxlength="60" placeholder="例如：Python 入門班 第 3 週" />
+      <label>自訂代碼（選填，英數與 -，留空會自動產生）</label>
+      <input id="code" type="text" maxlength="40" placeholder="例如：python-w3" />
+      <label class="row"><input id="allowMessage" type="checkbox" checked /> 允許學員留言 / 寫打卡心得</label>
+      <div style="margin-top:16px"><button id="create">建立場次</button></div>
+      <div id="createErr" class="err"></div>
+    </div>
+
+    <div id="result" class="card hide">
+      <h2 style="margin-top:0">✅ 場次已建立：<span id="rTitle"></span></h2>
+      <div class="links">
+        <div>👉 <b>學員簽到連結</b>（把它或下方 QR 給學員）：<br><a id="studentLink" target="_blank"></a> <button class="ghost" data-copy="studentLink">複製</button></div>
+        <div>📺 <b>投影牆連結</b>（自己開、投影到大螢幕）：<br><a id="wallLink" target="_blank"></a> <button class="ghost" data-copy="wallLink">複製</button></div>
+      </div>
+      <div class="qr"><div id="qrcode"></div><div class="muted">學員掃這個 QR Code 就能簽到</div></div>
+      <p class="muted">⚠️ 這個場次的管理權限存在你的瀏覽器裡。下次回來這個頁面就能看到並管理它。</p>
+    </div>
+
+    <div class="card">
+      <h2 style="margin-top:0">我建立過的場次</h2>
+      <div id="savedList"><span class="muted">尚無紀錄</span></div>
+    </div>
+
+    <div id="manage" class="card hide">
+      <h2 style="margin-top:0">管理：<span id="mTitle"></span> <span class="pill" id="mCount">0 人</span></h2>
+      <div class="muted">每 3 秒自動更新。可刪除不當的簽到。</div>
+      <table><thead><tr><th>名字</th><th>留言</th><th>時間</th><th></th></tr></thead><tbody id="mBody"></tbody></table>
+    </div>
+  </div>
+
+  <script>
+    const KEY = "checkin-wall-sessions";
+    const base = location.origin;
+    let manageTimer = null;
+
+    function getSaved() { try { return JSON.parse(localStorage.getItem(KEY) || "[]"); } catch { return []; } }
+    function saveSession(s) {
+      const list = getSaved().filter(x => x.slug !== s.slug);
+      list.unshift(s);
+      localStorage.setItem(KEY, JSON.stringify(list));
+    }
+
+    document.getElementById("create").onclick = async () => {
+      const title = document.getElementById("title").value.trim();
+      const code = document.getElementById("code").value.trim();
+      const allowMessage = document.getElementById("allowMessage").checked;
+      const err = document.getElementById("createErr");
+      err.textContent = "";
+      if (!title) { err.textContent = "請填寫課程名稱"; return; }
+      try {
+        const res = await fetch("/api/session", {
+          method: "POST", headers: { "content-type": "application/json" },
+          body: JSON.stringify({ title, code, allowMessage }),
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error || "建立失敗");
+        saveSession(data);
+        showResult(data);
+        renderSaved();
+        openManage(data);
+      } catch (e) { err.textContent = e.message; }
+    };
+
+    function showResult(s) {
+      const studentUrl = `${base}/s/${s.slug}`;
+      const wallUrl = `${base}/wall/${s.slug}`;
+      document.getElementById("rTitle").textContent = s.title;
+      const a = document.getElementById("studentLink"); a.href = studentUrl; a.textContent = studentUrl;
+      const w = document.getElementById("wallLink"); w.href = wallUrl; w.textContent = wallUrl;
+      const qr = document.getElementById("qrcode"); qr.innerHTML = "";
+      if (window.QRCode) new QRCode(qr, { text: studentUrl, width: 200, height: 200, colorDark: "#131610" });
+      document.getElementById("result").classList.remove("hide");
+    }
+
+    document.querySelectorAll("[data-copy]").forEach(b => {
+      b.onclick = () => {
+        const t = document.getElementById(b.dataset.copy).textContent;
+        navigator.clipboard.writeText(t); b.textContent = "已複製!"; setTimeout(() => b.textContent = "複製", 1200);
+      };
+    });
+
+    function renderSaved() {
+      const list = getSaved();
+      const el = document.getElementById("savedList");
+      if (!list.length) { el.innerHTML = `<span class="muted">尚無紀錄</span>`; return; }
+      el.innerHTML = list.map(s => `
+        <div class="saved-item">
+          <div><a href="/wall/${s.slug}" target="_blank">${escapeHtml(s.title)}</a> <span class="muted">/s/${escapeHtml(s.slug)}</span></div>
+          <div>
+            <button class="ghost" onclick='manageBy("${s.slug}")'>管理</button>
+            <button class="ghost" onclick='reshow("${s.slug}")'>連結/QR</button>
+          </div>
+        </div>`).join("");
+    }
+
+    window.reshow = (slug) => { const s = getSaved().find(x => x.slug === slug); if (s) { showResult(s); window.scrollTo({top:0,behavior:"smooth"}); } };
+    window.manageBy = (slug) => { const s = getSaved().find(x => x.slug === slug); if (s) openManage(s); };
+
+    function openManage(s) {
+      document.getElementById("mTitle").textContent = s.title;
+      document.getElementById("manage").classList.remove("hide");
+      document.getElementById("manage").scrollIntoView({ behavior: "smooth" });
+      if (manageTimer) clearInterval(manageTimer);
+      const tick = () => loadManage(s);
+      tick(); manageTimer = setInterval(tick, 3000);
+    }
+
+    async function loadManage(s) {
+      try {
+        const res = await fetch(`/api/list?slug=${encodeURIComponent(s.slug)}`);
+        const data = await res.json();
+        document.getElementById("mCount").textContent = data.count + " 人";
+        const rows = data.entries.slice().reverse();
+        document.getElementById("mBody").innerHTML = rows.map(e => `
+          <tr>
+            <td>${escapeHtml(e.name)}</td>
+            <td>${escapeHtml(e.message || "")}</td>
+            <td class="muted">${new Date(e.at).toLocaleTimeString("zh-TW")}</td>
+            <td><button class="danger" onclick='del("${s.slug}","${e.id}")'>刪除</button></td>
+          </tr>`).join("") || `<tr><td colspan="4" class="muted">還沒有人簽到</td></tr>`;
+      } catch {}
+    }
+
+    window.del = async (slug, id) => {
+      const s = getSaved().find(x => x.slug === slug);
+      if (!s) return;
+      if (!confirm("確定刪除這筆簽到？")) return;
+      await fetch("/api/remove", { method: "POST", headers: { "content-type": "application/json" },
+        body: JSON.stringify({ slug, id, adminToken: s.adminToken }) });
+      loadManage(s);
+    };
+
+    function escapeHtml(s){return String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));}
+
+    renderSaved();
+  </script>
+</body>
+</html>

@@ -1,0 +1,13 @@
+{
+  "name": "checkin-wall",
+  "version": "1.0.0",
+  "description": "課程簽到牆 — 學員輸入名字即時出現在牆上，可投影到大螢幕",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "netlify dev"
+  },
+  "dependencies": {
+    "@netlify/blobs": "^8.1.0"
+  }
+}
