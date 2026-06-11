@@ -20,7 +20,7 @@
     .bar .t .dot { color: var(--coral); }
     .bar .n { font-family: var(--display); font-weight: 700; font-size: 18px; }
     .list { display: flex; flex-direction: column; gap: 8px; overflow: hidden; }
-    .card { background: var(--paper2); border: 1px solid var(--ink); padding: 9px 11px; animation: slide .4s ease; }
+    .card { background: var(--paper2); border: 3px solid var(--ink); box-shadow: 3px 3px 0 var(--ink); padding: 9px 11px; animation: slide .4s ease; }
     @keyframes slide { from { opacity: 0; transform: translateX(-10px); } to { opacity: 1; transform: none; } }
     .card .nm { font-family: var(--mono); font-weight: 700; font-size: 12px; letter-spacing: .5px; text-transform: uppercase; }
     .card .nm .v { color: var(--coral); float: right; }
@@ -55,7 +55,7 @@
       try {
         const data = await (await fetch(`/api/list?slug=${encodeURIComponent(slug)}`)).json();
         document.getElementById("count").textContent = data.count;
-        if (data.count === 0) { list.innerHTML = `<div class="empty">等待第一筆…</div>`; return; }
+        if (data.count === 0) { list.innerHTML = `<div class="mascot-box" style="padding:10px 0"><img src="/mascot.svg" alt="" style="width:64px"><div class="bubble" style="font-size:12px">等待第一筆…</div></div>`; return; }
         let items = data.entries.slice();
         if (SESSION.mode === "qa") items.sort((a,b) => (b.votes||0)-(a.votes||0) || b.at-a.at);
         else items.reverse();

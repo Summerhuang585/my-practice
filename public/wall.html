@@ -60,7 +60,7 @@
       try {
         const data = await (await fetch(`/api/list?slug=${encodeURIComponent(slug)}`)).json();
         document.getElementById("count").textContent = String(data.count).padStart(2, "0");
-        if (data.count === 0) { feed.innerHTML = `<div class="center-msg">等待第一筆…</div>`; return; }
+        if (data.count === 0) { feed.innerHTML = `<div class="mascot-box" style="margin-top:12vh"><img src="/mascot.svg" alt=""><div class="bubble">等待第一筆，快掃 QR 加入！</div></div>`; return; }
         const firstLoad = seen.size === 0;
         let items = data.entries.slice();
         if (SESSION.mode === "qa") items.sort((a,b) => (b.votes||0)-(a.votes||0) || b.at-a.at);
