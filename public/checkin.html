@@ -17,6 +17,8 @@
     .qr .txt { font-size: 15px; color: var(--muted); line-height: 1.5; }
     .send-row { display: flex; justify-content: space-between; align-items: center; margin-top: 18px; gap: 12px; }
     .modetag { color: var(--coral); }
+    .page-mascot { width: 92px; height: auto; display: block; margin: 0 0 2px auto;
+      animation: hop 1.1s steps(2,end) infinite; transform-origin: bottom center; filter: drop-shadow(3px 3px 0 rgba(28,27,22,.2)); }
   </style>
 </head>
 <body>
@@ -63,6 +65,7 @@
       const btnLabel = s.mode === "checkin" ? "簽到 Check in →" : s.mode === "qa" ? "送出問題 →" : "送出 Send →";
 
       app.innerHTML = `
+        <img class="page-mascot" src="/avatar.png" alt="Summer" />
         <div class="rule"></div>
         <div class="kicker"><span class="live">LIVE · <span class="modetag">${MODE_LABEL[s.mode]}</span></span><span>CHECK·IN WALL — ${today}</span></div>
         <div class="rule thin"></div>
