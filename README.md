@@ -6,6 +6,13 @@
 ## 文件
 - [PRD 產品需求文件](docs/PRD.md) — 目標、使用者、功能、成功標準
 - [SDD 軟體設計文件](docs/SDD.md) — 架構、路由、API、資料模型
+- [隱私說明](docs/PRIVACY.md) ｜ [CHANGELOG](CHANGELOG.md) ｜ [LICENSE](LICENSE)(MIT)
+
+## 測試
+```bash
+npm test   # node --test，純邏輯單元測試（slug 清洗、防同名、投票、限流）
+```
+push / PR 會由 GitHub Actions 自動跑(`.github/workflows/ci.yml`)。
 
 ## 三種模式（每個場次由講者選一個）
 
@@ -51,6 +58,7 @@ npx netlify dev   # http://localhost:8888
 
 ## 技術
 - 前端：純 HTML/CSS/JS（無建置步驟），共用 `public/brand.css`
-- 後端：Netlify Functions（`netlify/functions/*.mjs`）
-  - `session` 建立/讀取場次 ｜ `checkin` 送出 ｜ `list` 列表 ｜ `vote` 按讚 ｜ `answer` 標記已回答 ｜ `remove` 刪除 ｜ `export` 匯出 CSV
+- 後端：Netlify Functions（`netlify/functions/*.mjs`），共用純邏輯於 `lib/`
+  - `session` 建立/改名/刪除/讀取 ｜ `checkin` 送出 ｜ `list` 列表 ｜ `vote` 按讚 ｜ `answer` 標記已回答 ｜ `remove` 刪除單筆 ｜ `export` 匯出 CSV ｜ `cleanup` 每日排程清理逾期資料
+  - 公開寫入端點（`checkin`/`vote`）有限流防濫用
 - 儲存：Netlify Blobs ｜ 即時：前端每 2 秒輪詢

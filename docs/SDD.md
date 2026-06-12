@@ -61,6 +61,11 @@ Netlify CDN ── 靜態頁 (public/*.html, brand.css, avatar.png, mascot.svg)
 | `answer` | POST | Q&A 標記/取消已回答 | adminToken |
 | `remove` | POST | 刪除單筆 | adminToken |
 | `export` | GET `?slug=&token=` | 匯出 CSV 名單 | adminToken |
+| `cleanup` | 排程(每日) | 刪除逾 `MAX_AGE_DAYS`(30 天)的場次與其資料 | 排程觸發 |
+
+公開寫入端點(`checkin`、`vote`)套用**限流**(`lib/ratelimit`):滑動視窗記錄每個 key(IP / clientId)最近請求,超過上限回 `429`。教室常共用對外 IP,故上限刻意放寬,僅攔腳本式灌爆。
+
+共用模組(`netlify/functions/lib/`):`http`(JSON 回應)、`validate`(slug/姓名/訊息/emoji/投票等純邏輯)、`ratelimit-core`(純滑動視窗)、`ratelimit`(Blobs 包裝)。純邏輯模組無外部相依,供單元測試直接載入。
 
 ## 5. 資料模型(Netlify Blobs)
 兩個 store:
@@ -102,11 +107,20 @@ Netlify CDN ── 靜態頁 (public/*.html, brand.css, avatar.png, mascot.svg)
 ## 7. 安全與限制
 - 權限模型輕量:adminToken 即能力憑證,存在講者瀏覽器;清除瀏覽器資料即失去管理權。
 - 防同名、防重複按讚為輕量檢查,非強身分驗證。
+- **限流**:公開寫入端點以滑動視窗限流(見 §4),為盡力而為,非嚴格防護。
+- **資料保存**:場次逾 30 天由排程 `cleanup` 自動刪除;講者亦可手動刪除整場(見隱私說明 `docs/PRIVACY.md`)。
 - 場次清單不跨裝置(localStorage)。
 - 即時性以輪詢實作,2 秒延遲為可接受取捨。
 
-## 8. 本機開發
+## 8. 測試與 CI
+- 單元測試:`node:test`,涵蓋 `lib/validate` 與 `lib/ratelimit-core` 的純邏輯(slug 清洗、防同名、投票切換、限流視窗、IP 解析)。
+- 執行:`npm test`(`node --test`,免安裝相依)。
+- CI:`.github/workflows/ci.yml` 於 push / PR 自動跑測試。
+- 部署:推上 `main` 由 Netlify 自動部署(等同 CD)。
+
+## 9. 本機開發
 ```bash
+npm test          # 跑單元測試
 npm install
 npx netlify dev   # http://localhost:8888(含 Functions 與 Blobs 模擬)
 ```

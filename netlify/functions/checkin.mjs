@@ -1,11 +1,20 @@
 import { getStore } from "@netlify/blobs";
+import { json } from "./lib/http.mjs";
+import { cleanName, cleanMessage, isAllowedEmoji, isDuplicateName } from "./lib/validate.mjs";
+import { rateLimit, clientIp } from "./lib/ratelimit.mjs";
 
 // 學員送出一筆（簽到 / 留言 / 提問，依場次模式）
 // POST body: { slug, name, message?, emoji? }
-const ALLOWED_EMOJI = ["👋", "👍", "🎉", "🔥", "✏️", "❤️", "😀", "🙌"];
+const RL = { limit: 40, windowMs: 10000 }; // 每 IP 10 秒上限（放寬，僅擋灌爆）
 
 export default async (req) => {
   if (req.method !== "POST") return json({ error: "只接受 POST" }, 405);
+
+  const rl = await rateLimit("checkin", clientIp(req), RL);
+  if (!rl.allowed) {
+    return json({ error: "太快了，請稍等幾秒再試 🙏" }, 429,
+      { "retry-after": String(Math.ceil(rl.retryAfterMs / 1000)) });
+  }
 
   let body = {};
   try { body = await req.json(); } catch { return json({ error: "請傳入 JSON" }, 400); }
@@ -17,11 +26,9 @@ export default async (req) => {
   const session = await sessions.get(slug, { type: "json" });
   if (!session) return json({ error: "找不到這個場次" }, 404);
 
-  let name = String(body.name || "").trim().slice(0, 40);
-  if (!name) {
-    if (session.allowAnonymous) name = "匿名";
-    else return json({ error: "請輸入名字" }, 400);
-  }
+  const nameRes = cleanName(body.name, { allowAnonymous: session.allowAnonymous });
+  if (nameRes.error) return json({ error: nameRes.error }, 400);
+  const name = nameRes.name;
 
   const store = getStore("checkins");
 
@@ -29,17 +36,16 @@ export default async (req) => {
   if (session.mode === "checkin") {
     const { blobs } = await store.list({ prefix: `${slug}/` });
     const existing = await Promise.all(blobs.map((b) => store.get(b.key, { type: "json" })));
-    const dup = existing.some((e) => e && e.name.trim().toLowerCase() === name.toLowerCase());
-    if (dup) return json({ error: "你已經簽到過了 ✅" }, 409);
+    if (isDuplicateName(existing, name)) return json({ error: "你已經簽到過了 ✅" }, 409);
   }
 
   const id = `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
   const entry = { id, name, at: Date.now() };
 
   if (session.mode !== "checkin") {
-    entry.message = String(body.message || "").trim().slice(0, 280);
+    entry.message = cleanMessage(body.message);
   }
-  if (session.allowEmoji && ALLOWED_EMOJI.includes(body.emoji)) {
+  if (session.allowEmoji && isAllowedEmoji(body.emoji)) {
     entry.emoji = body.emoji;
   }
   if (session.mode === "qa") {
@@ -51,7 +57,3 @@ export default async (req) => {
   await store.setJSON(`${slug}/${id}`, entry);
   return json(entry);
 };
-
-function json(obj, status = 200) {
-  return new Response(JSON.stringify(obj), { status, headers: { "content-type": "application/json; charset=utf-8" } });
-}

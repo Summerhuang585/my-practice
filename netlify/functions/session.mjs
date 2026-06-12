@@ -1,9 +1,12 @@
 import { getStore } from "@netlify/blobs";
+import { json } from "./lib/http.mjs";
+import { slugify, cleanTitle, normalizeMode } from "./lib/validate.mjs";
 
-// 建立 / 讀取「場次」
-// POST  body: { title, code?, mode, allowAnonymous, allowEmoji }
-// GET   ?slug=xxx  -> 公開資訊（不含 adminToken）
-const MODES = ["checkin", "message", "qa"];
+// 建立 / 讀取 / 改名 / 刪除「場次」
+// POST   建立    body: { title, code?, mode, allowAnonymous, allowEmoji }
+// PUT    改名    body: { slug, adminToken, title }
+// DELETE 刪除    body: { slug, adminToken }
+// GET    ?slug=  公開資訊（不含 adminToken）
 
 export default async (req) => {
   const sessions = getStore("sessions");
@@ -12,13 +15,12 @@ export default async (req) => {
     let body = {};
     try { body = await req.json(); } catch { return json({ error: "請傳入 JSON" }, 400); }
 
-    const title = String(body.title || "").trim().slice(0, 60);
+    const title = cleanTitle(body.title);
     if (!title) return json({ error: "請填寫名稱" }, 400);
 
-    const mode = MODES.includes(body.mode) ? body.mode : "checkin";
+    const mode = normalizeMode(body.mode);
 
-    let slug = String(body.code || "").trim().toLowerCase()
-      .replace(/[^a-z0-9-]/g, "-").replace(/-+/g, "-").replace(/^-|-$/g, "").slice(0, 40);
+    let slug = slugify(body.code);
     if (!slug) slug = randomSlug();
 
     const existing = await sessions.get(slug, { type: "json" });
@@ -41,7 +43,7 @@ export default async (req) => {
     let body = {};
     try { body = await req.json(); } catch { return json({ error: "請傳入 JSON" }, 400); }
     const { slug, adminToken } = body;
-    const title = String(body.title || "").trim().slice(0, 60);
+    const title = cleanTitle(body.title);
     if (!slug || !adminToken) return json({ error: "缺少參數" }, 400);
     if (!title) return json({ error: "請填寫名稱" }, 400);
     const data = await sessions.get(slug, { type: "json" });
@@ -60,11 +62,9 @@ export default async (req) => {
     if (!slug || !adminToken) return json({ error: "缺少參數" }, 400);
     const data = await sessions.get(slug, { type: "json" });
     if (!data || data.adminToken !== adminToken) return json({ error: "沒有權限" }, 401);
-    // 先刪掉這個場次底下的所有留言/簽到
     const store = getStore("checkins");
     const { blobs } = await store.list({ prefix: `${slug}/` });
     await Promise.all(blobs.map((b) => store.delete(b.key)));
-    // 再刪場次本身
     await sessions.delete(slug);
     return json({ ok: true, deleted: slug });
   }
@@ -79,6 +79,3 @@ export default async (req) => {
 };
 
 function randomSlug() { return "s-" + Math.random().toString(36).slice(2, 8); }
-function json(obj, status = 200) {
-  return new Response(JSON.stringify(obj), { status, headers: { "content-type": "application/json; charset=utf-8" } });
-}
