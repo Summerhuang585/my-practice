@@ -52,6 +52,23 @@ export default async (req) => {
     return json(pub);
   }
 
+  // 刪除整個場次（需要 adminToken），連同底下所有簽到/留言一起清除
+  if (req.method === "DELETE") {
+    let body = {};
+    try { body = await req.json(); } catch { return json({ error: "請傳入 JSON" }, 400); }
+    const { slug, adminToken } = body;
+    if (!slug || !adminToken) return json({ error: "缺少參數" }, 400);
+    const data = await sessions.get(slug, { type: "json" });
+    if (!data || data.adminToken !== adminToken) return json({ error: "沒有權限" }, 401);
+    // 先刪掉這個場次底下的所有留言/簽到
+    const store = getStore("checkins");
+    const { blobs } = await store.list({ prefix: `${slug}/` });
+    await Promise.all(blobs.map((b) => store.delete(b.key)));
+    // 再刪場次本身
+    await sessions.delete(slug);
+    return json({ ok: true, deleted: slug });
+  }
+
   const url = new URL(req.url);
   const slug = url.searchParams.get("slug");
   if (!slug) return json({ error: "缺少 slug" }, 400);
