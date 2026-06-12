@@ -30,13 +30,14 @@
       box-shadow: 5px 5px 0 var(--ink); padding: 10px 10px 8px; display: none; flex-direction: column; align-items: center; gap: 6px; z-index: 20; }
     .joinqr-cap { font-family: var(--mono); font-size: 11px; letter-spacing: 1px; text-transform: uppercase; color: var(--ink); text-align: center; line-height: 1.3; }
     .joinqr-cap span { color: var(--muted); }
+    #cornerqr { display: flex; justify-content: center; }
     .joinqr img, .joinqr canvas { display: block; }
     /* 開場大 QR（還沒人簽到時置中顯示） */
     .empty-join { display: flex; flex-direction: column; align-items: center; gap: 16px; margin-top: 3vh; }
-    .empty-mascot { width: 80px; height: auto; animation: bobY 1.1s steps(2,end) infinite; transform-origin: bottom center; }
-    @keyframes bobY { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-8px); } }
+    .empty-mascot { width: 80px; height: auto; animation: dash .7s steps(4,end) infinite; transform-origin: bottom center; }
     .bigqr-card { background: #fff; border: 3px solid var(--ink); box-shadow: 7px 7px 0 var(--ink); padding: 20px 20px 16px; text-align: center; }
-    .bigqr-card img, .bigqr-card canvas { display: block; }
+    .bigqr-card #bigqr { display: flex; justify-content: center; }
+    .bigqr-card img, .bigqr-card canvas { display: block; margin: 0 auto; }
     .bigqr-cap { font-family: var(--mono); font-size: 15px; letter-spacing: 2px; text-transform: uppercase; color: var(--coral); margin-top: 12px; }
     .bigqr-url { font-family: var(--mono); font-size: 14px; color: var(--muted); margin-top: 5px; }
   </style>
