@@ -35,6 +35,8 @@
     .pill { display:inline-block; background:var(--pink); color:#fff; padding:3px 9px; font-size:11px; font-family: var(--mono); letter-spacing: 1px; }
     .small { padding: 6px 12px; font-size: 11px; }
     .rowbtns { display: flex; gap: 6px; flex-wrap: wrap; }
+    .hint-note { font-family: var(--mono); font-size: 12px; color: var(--muted); margin-top: 6px; min-height: 16px; }
+    .hint-note b { color: var(--coral); }
     .btn.ghost.danger { color: var(--coral); border-color: var(--coral); }
     .btn.ghost.danger:hover { background: var(--coral); color: #fff; }
     .tablewrap { overflow-x: auto; -webkit-overflow-scrolling: touch; }
@@ -57,8 +59,9 @@
       <h2>建立新場次</h2>
       <label class="flabel">名稱</label>
       <div class="field"><input id="title" type="text" maxlength="60" placeholder="例如：AI 工作坊 第 3 場" /></div>
-      <label class="flabel">自訂代碼（選填，英數與 -，留空自動產生）</label>
-      <div class="field"><input id="code" type="text" maxlength="40" placeholder="例如：ai-w3" /></div>
+      <label class="flabel">自訂代碼（選填，留空會自動產生）</label>
+      <div class="field"><input id="code" type="text" maxlength="40" placeholder="只限英數與 -（中文／空格會被略過），例如：ai-0613" /></div>
+      <div class="hint-note" id="codeHint"></div>
 
       <label class="flabel" style="margin-top:18px">模式</label>
       <div class="modes" id="modes">
@@ -254,6 +257,25 @@
     };
 
     function escapeHtml(s){return String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));}
+
+    // 即時預覽：把輸入清成跟後端一致的代碼，讓老師打字就看到實際結果
+    function slugify(v){ return String(v||"").trim().toLowerCase()
+      .replace(/[^a-z0-9-]/g,"-").replace(/-+/g,"-").replace(/^-|-$/g,"").slice(0,40); }
+    (function(){
+      const input = document.getElementById("code"), hint = document.getElementById("codeHint");
+      if (!input || !hint) return;
+      const upd = () => {
+        const raw = input.value.trim();
+        if (!raw) { hint.innerHTML = "留空 → 系統會自動產生一組代碼"; return; }
+        const slug = slugify(raw);
+        if (!slug) { hint.innerHTML = "這組代碼<b>全部是中文／符號，會被略過</b>，改成系統自動產生。建議用英數,如 ai-0613"; return; }
+        hint.innerHTML = slug === raw.toLowerCase()
+          ? `學員連結將是 <b>/s/${escapeHtml(slug)}</b>`
+          : `會自動整理成 <b>/s/${escapeHtml(slug)}</b>(中文／空格已略過)`;
+      };
+      input.addEventListener("input", upd); upd();
+    })();
+
     renderSaved();
   </script>
 </body>
