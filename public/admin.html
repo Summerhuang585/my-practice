@@ -35,6 +35,15 @@
     .pill { display:inline-block; background:var(--pink); color:#fff; padding:3px 9px; font-size:11px; font-family: var(--mono); letter-spacing: 1px; }
     .small { padding: 6px 12px; font-size: 11px; }
     .rowbtns { display: flex; gap: 6px; flex-wrap: wrap; }
+    .tablewrap { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+    .tablewrap table { min-width: 460px; }
+    @media (max-width: 560px) {
+      .wrap { padding: 22px 15px 50px; }
+      h1.page { font-size: 28px; }
+      .modes { grid-template-columns: 1fr; }
+      .saved-item { flex-direction: column; align-items: flex-start; }
+      .links a { font-size: 12px; }
+    }
   </style>
 </head>
 <body>
@@ -85,8 +94,11 @@
 
     <div id="manage" class="card hide">
       <h2>管理：<span id="mTitle"></span> <span class="pill" id="mCount">0</span></h2>
-      <div style="margin:6px 0 4px"><button class="btn ghost small" id="exportBtn">⬇ 匯出 CSV 名單</button></div>
-      <table><thead><tr><th>#</th><th>名字</th><th>內容</th><th id="thExtra"></th><th>時間</th><th></th></tr></thead><tbody id="mBody"></tbody></table>
+      <div style="margin:6px 0 4px; display:flex; gap:8px; flex-wrap:wrap">
+        <button class="btn ghost small" id="renameBtn">✏️ 改名稱</button>
+        <button class="btn ghost small" id="exportBtn">⬇ 匯出 CSV 名單</button>
+      </div>
+      <div class="tablewrap"><table><thead><tr><th>#</th><th>名字</th><th>內容</th><th id="thExtra"></th><th>時間</th><th></th></tr></thead><tbody id="mBody"></tbody></table></div>
     </div>
   </div>
 
@@ -150,15 +162,33 @@
           <div class="rowbtns">
             <button class="btn ghost small" onclick='manageBy("${s.slug}")'>管理</button>
             <button class="btn ghost small" onclick='reshow("${s.slug}")'>連結/QR</button>
+            <button class="btn ghost small" onclick='rename("${s.slug}")'>改名稱</button>
           </div>
         </div>`).join("");
     }
     window.reshow = (slug) => { const s = getSaved().find(x => x.slug === slug); if (s) { showResult(s); window.scrollTo({top:0,behavior:"smooth"}); } };
     window.manageBy = (slug) => { const s = getSaved().find(x => x.slug === slug); if (s) openManage(s); };
 
+    window.rename = async (slug) => {
+      const s = getSaved().find(x => x.slug === slug); if (!s) return;
+      const input = prompt("輸入新的場次名稱：", s.title);
+      if (input === null) return;
+      const title = input.trim(); if (!title) return;
+      try {
+        const res = await fetch("/api/session", { method: "PUT", headers: { "content-type": "application/json" },
+          body: JSON.stringify({ slug, adminToken: s.adminToken, title }) });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error || "改名失敗");
+        s.title = title; saveSession(s); renderSaved();
+        const mt = document.getElementById("mTitle"); if (mt) mt.textContent = title;
+        const rt = document.getElementById("rTitle"); if (rt) rt.textContent = title;
+      } catch (e) { alert(e.message); }
+    };
+
     function openManage(s) {
       document.getElementById("mTitle").textContent = s.title;
       document.getElementById("thExtra").textContent = s.mode === "qa" ? "讚 / 已回答" : "";
+      document.getElementById("renameBtn").onclick = () => rename(s.slug);
       document.getElementById("exportBtn").onclick = () => location.href = `/api/export?slug=${encodeURIComponent(s.slug)}&token=${encodeURIComponent(s.adminToken)}`;
       document.getElementById("manage").classList.remove("hide");
       document.getElementById("manage").scrollIntoView({ behavior: "smooth" });

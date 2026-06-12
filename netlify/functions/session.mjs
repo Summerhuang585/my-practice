@@ -36,6 +36,22 @@ export default async (req) => {
     return json(data);
   }
 
+  // 修改場次名稱（需要 adminToken）
+  if (req.method === "PUT") {
+    let body = {};
+    try { body = await req.json(); } catch { return json({ error: "請傳入 JSON" }, 400); }
+    const { slug, adminToken } = body;
+    const title = String(body.title || "").trim().slice(0, 60);
+    if (!slug || !adminToken) return json({ error: "缺少參數" }, 400);
+    if (!title) return json({ error: "請填寫名稱" }, 400);
+    const data = await sessions.get(slug, { type: "json" });
+    if (!data || data.adminToken !== adminToken) return json({ error: "沒有權限" }, 401);
+    data.title = title;
+    await sessions.setJSON(slug, data);
+    const { adminToken: _t, ...pub } = data;
+    return json(pub);
+  }
+
   const url = new URL(req.url);
   const slug = url.searchParams.get("slug");
   if (!slug) return json({ error: "缺少 slug" }, 400);
