@@ -17,7 +17,7 @@ export default async (req) => {
   const entries = (await Promise.all(blobs.map((b) => store.get(b.key, { type: "json" })))).filter(Boolean);
   entries.sort((a, b) => a.at - b.at);
 
-  const rows = [["序號", "名字", "內容", "讚數", "已回答", "時間"]];
+  const rows = [["序號", "名字", "內容", "愛心數", "已回答", "時間"]];
   entries.forEach((e, i) => {
     rows.push([
       i + 1,

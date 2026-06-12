@@ -54,8 +54,8 @@
       document.title = s.title + " · " + MODE_LABEL[s.mode];
       const today = new Date().toLocaleDateString("en-US", { month: "short", day: "2-digit", year: "numeric" }).toUpperCase();
       const dek = s.mode === "checkin" ? "輸入你的名字完成簽到。"
-        : s.mode === "qa" ? "把想問的問題貼上來，也幫想問的問題按個讚。"
-        : "留下你的名字與一句話，跟大家打個招呼。";
+        : s.mode === "qa" ? "把想問的問題貼上來，也幫想問的問題點 ❤️。"
+        : "留下你的名字與一句話，也能幫別人的留言點 ❤️。";
       const namePh = s.allowAnonymous ? "你的名字（可留空 = 匿名）" : "你的名字";
       const hasText = s.mode !== "checkin";
       const textLabel = s.mode === "qa" ? "你的問題 / Question" : "一句話 / Note";
@@ -150,12 +150,12 @@
                 <span class="time">${fmtTime(e.at)}</span></div>
               ${e.message ? `<div class="msg">${escapeHtml(e.message)}</div>` : ""}
               ${e.emoji ? `<div class="emoji">${e.emoji}</div>` : ""}
-              ${SESSION.mode==="qa" ? `<button class="vote ${voted?"on":""}" data-id="${e.id}">👍 <b>${e.votes||0}</b></button>` : ""}
+              ${(SESSION.mode==="qa"||SESSION.mode==="message") ? `<button class="vote ${voted?"on":""}" data-id="${e.id}">❤️ <b>${e.votes||0}</b></button>` : ""}
             </div>
           </div>`;
         }).join("") || mascotEmpty(SESSION.mode==="qa"?"還沒有問題，當第一個提問者！":SESSION.mode==="checkin"?"還沒有人簽到，當第一個吧！":"還沒有人留言，先說聲哈囉！");
 
-        if (SESSION.mode === "qa") feed.querySelectorAll(".vote").forEach(b => b.onclick = () => doVote(b.dataset.id));
+        if (SESSION.mode === "qa" || SESSION.mode === "message") feed.querySelectorAll(".vote").forEach(b => b.onclick = () => doVote(b.dataset.id));
       } catch {}
     }
 

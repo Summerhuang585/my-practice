@@ -78,7 +78,7 @@
                 <span class="time">${fmtTime(e.at)}</span></div>
               ${e.message ? `<div class="msg">${escapeHtml(e.message)}</div>` : ""}
               ${e.emoji ? `<div class="emoji">${e.emoji}</div>` : ""}
-              ${SESSION.mode==="qa" ? `<div class="votes-badge">👍 ${e.votes||0}</div>` : ""}
+              ${SESSION.mode==="qa" ? `<div class="votes-badge">❤️ ${e.votes||0}</div>` : (SESSION.mode==="message" && (e.votes||0)>0 ? `<div class="votes-badge">❤️ ${e.votes}</div>` : "")}
             </div>
           </div>`;
         }).join("");

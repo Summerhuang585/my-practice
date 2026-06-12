@@ -62,7 +62,7 @@
         items = items.slice(0, limit);
         list.innerHTML = items.map(e => `
           <div class="card ${e.answered?"ans":""}">
-            <div class="nm">${escapeHtml(e.name)}${SESSION.mode==="qa"?`<span class="v">👍 ${e.votes||0}</span>`:""}</div>
+            <div class="nm">${escapeHtml(e.name)}${SESSION.mode==="qa"?`<span class="v">❤️ ${e.votes||0}</span>`:(SESSION.mode==="message"&&(e.votes||0)>0?`<span class="v">❤️ ${e.votes}</span>`:"")}</div>
             ${e.message ? `<div class="ms">${escapeHtml(e.message)}${e.emoji?" "+e.emoji:""}</div>` : (e.emoji?`<div class="ms">${e.emoji}</div>`:"")}
           </div>`).join("");
       } catch {}

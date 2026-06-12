@@ -187,7 +187,7 @@
 
     function openManage(s) {
       document.getElementById("mTitle").textContent = s.title;
-      document.getElementById("thExtra").textContent = s.mode === "qa" ? "讚 / 已回答" : "";
+      document.getElementById("thExtra").textContent = s.mode === "qa" ? "❤️ / 已回答" : s.mode === "message" ? "❤️" : "";
       document.getElementById("renameBtn").onclick = () => rename(s.slug);
       document.getElementById("exportBtn").onclick = () => location.href = `/api/export?slug=${encodeURIComponent(s.slug)}&token=${encodeURIComponent(s.adminToken)}`;
       document.getElementById("manage").classList.remove("hide");
@@ -207,7 +207,7 @@
             <td>${i+1}</td>
             <td>${escapeHtml(e.name)}</td>
             <td>${escapeHtml(e.message || "")} ${e.emoji||""}</td>
-            <td>${s.mode==="qa" ? `👍${e.votes||0} ${e.answered?'<span class="answered">已回答</span>':''}` : ""}</td>
+            <td>${s.mode==="qa" ? `❤️${e.votes||0} ${e.answered?'<span class="answered">已回答</span>':''}` : (s.mode==="message" ? `❤️${e.votes||0}` : "")}</td>
             <td class="muted">${new Date(e.at).toLocaleTimeString("zh-TW")}</td>
             <td><div class="rowbtns">
               ${s.mode==="qa" ? `<button class="btn ghost small" onclick='toggleAns("${s.slug}","${e.id}",${e.answered?"false":"true"})'>${e.answered?"設未回答":"標已回答"}</button>` : ""}
