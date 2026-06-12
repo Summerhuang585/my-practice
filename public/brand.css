@@ -87,7 +87,8 @@ footer { margin-top: 38px; text-align: center; font-family: var(--mono); font-si
 /* 空狀態 + 吉祥物 */
 .center-msg { text-align: center; color: var(--muted); padding: 26px 0; font-family: var(--serif); font-size: 15px; }
 .mascot-box { text-align: center; padding: 24px 0; }
-.mascot-box img { width: 104px; height: auto; display: block; margin: 0 auto 12px; animation: hop 1s steps(2,end) infinite; transform-origin: bottom center; }
+.mascot-box img { width: 104px; height: auto; display: block; margin: 0 auto 12px; animation: dash .7s steps(4,end) infinite; transform-origin: bottom center; }
 @keyframes hop { 0% { transform: translateY(0) rotate(0deg); } 50% { transform: translateY(-9px) rotate(-3deg); } 100% { transform: translateY(0) rotate(0deg); } }
+@keyframes dash { 0% { transform: translate(-7px,0) rotate(-5deg); } 50% { transform: translate(7px,-9px) rotate(5deg); } 100% { transform: translate(-7px,0) rotate(-5deg); } }
 .bubble { display: inline-block; background: var(--paper2); border: 3px solid var(--ink); box-shadow: 4px 4px 0 var(--ink);
   padding: 10px 16px; font-family: var(--serif); font-size: 14px; color: var(--ink); }
