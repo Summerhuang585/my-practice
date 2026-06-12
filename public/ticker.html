@@ -8,6 +8,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=Noto+Serif+TC:wght@400;600;900&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="/brand.css">
+  <script src="https://cdn.jsdelivr.net/gh/davidshimjs/qrcodejs@04f46c6a/qrcode.min.js"></script>
   <style>
     /* 角落模式：細長條，可常駐小視窗，或當 OBS 透明 browser source */
     html, body { height: 100%; }
@@ -28,16 +29,28 @@
       display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
     .card.ans { border-color: var(--sage); opacity: .65; }
     .empty { font-family: var(--display); font-style: italic; color: var(--muted); padding: 14px 4px; }
+    /* 底部常駐 QR（小視窗／OBS 都能讓觀眾掃描加入） */
+    .joinbar { display: flex; align-items: center; gap: 9px; margin-top: 8px; padding: 7px 9px; flex-shrink: 0;
+      background: #fff; border: 3px solid var(--ink); box-shadow: 3px 3px 0 var(--ink); }
+    .joinbar #tqr { flex: 0 0 auto; line-height: 0; }
+    .joinbar #tqr canvas, .joinbar #tqr img { display: block; }
+    .joinbar .cap { font-family: var(--mono); font-size: 10px; letter-spacing: 1px; text-transform: uppercase; line-height: 1.4; color: var(--ink); }
+    .joinbar .cap span { color: var(--muted); }
   </style>
 </head>
 <body>
   <div class="panel">
     <div class="bar"><span class="t"><span class="dot">●</span> LIVE <span id="mode"></span></span><span class="n" id="count">0</span></div>
     <div class="list" id="list"></div>
+    <div class="joinbar" id="joinbar" style="display:none">
+      <div id="tqr"></div>
+      <div class="cap">掃描加入<br><span>Scan to join</span></div>
+    </div>
   </div>
 
   <script>
     const slug = decodeURIComponent((location.pathname.split("/ticker/")[1] || "")).replace(/\/+$/,"");
+    const joinURL = location.origin + "/s/" + slug;
     const params = new URLSearchParams(location.search);
     if (params.get("transparent") === "1" || params.get("bg") === "transparent") document.body.classList.add("transparent");
     const limit = parseInt(params.get("limit") || "6", 10);
@@ -70,8 +83,16 @@
 
     function escapeHtml(s){return String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));}
 
+    function renderJoinQR(){
+      const box = document.getElementById("tqr");
+      if (box.dataset.done || !window.QRCode) return;
+      new QRCode(box, { text: joinURL, width: 64, height: 64, colorDark: "#1c1b16", colorLight: "#ffffff" });
+      box.dataset.done = "1";
+      document.getElementById("joinbar").style.display = "flex";
+    }
+
     if (!slug) list.innerHTML = `<div class="empty">缺少代碼</div>`;
-    else { loadSession().then(() => { refresh(); setInterval(refresh, 2000); }); }
+    else { renderJoinQR(); loadSession().then(() => { refresh(); setInterval(refresh, 2000); }); }
   </script>
 </body>
 </html>
