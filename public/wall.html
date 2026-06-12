@@ -8,6 +8,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;0,900;1,500&family=Noto+Serif+TC:wght@400;600;900&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="/brand.css">
+  <script src="https://cdn.jsdelivr.net/gh/davidshimjs/qrcodejs@04f46c6a/qrcode.min.js"></script>
   <style>
     body { padding: 30px 44px 40px; }
     .masthead { border-top: 2px solid var(--ink); border-bottom: 1px solid var(--ink); padding: 8px 0 0; margin-bottom: 6px; }
@@ -23,7 +24,20 @@
     .feed .entry .name { font-size: 15px; }
     .feed .entry .msg { font-size: 20px; }
     .votes-badge { display:inline-flex; align-items:center; gap:5px; font-family: var(--mono); font-size: 14px; color: var(--coral); margin-top: 8px; }
-    .hint { position: fixed; bottom: 10px; right: 18px; font-family: var(--mono); font-size: 11px; color: var(--muted); letter-spacing: 1px; }
+    .hint { position: fixed; bottom: 10px; left: 18px; font-family: var(--mono); font-size: 11px; color: var(--muted); letter-spacing: 1px; }
+    /* 右下角常駐 QR（有人簽到後顯示） */
+    .joinqr { position: fixed; right: 22px; bottom: 22px; background: #fff; border: 3px solid var(--ink);
+      box-shadow: 5px 5px 0 var(--ink); padding: 10px 10px 8px; display: none; flex-direction: column; align-items: center; gap: 6px; z-index: 20; }
+    .joinqr-cap { font-family: var(--mono); font-size: 11px; letter-spacing: 1px; text-transform: uppercase; color: var(--ink); text-align: center; line-height: 1.3; }
+    .joinqr-cap span { color: var(--muted); }
+    .joinqr img, .joinqr canvas { display: block; }
+    /* 開場大 QR（還沒人簽到時置中顯示） */
+    .empty-join { display: flex; flex-direction: column; align-items: center; gap: 16px; margin-top: 3vh; }
+    .empty-mascot { width: 80px; height: auto; animation: dash .7s steps(4,end) infinite; transform-origin: bottom center; }
+    .bigqr-card { background: #fff; border: 3px solid var(--ink); box-shadow: 7px 7px 0 var(--ink); padding: 20px 20px 16px; text-align: center; }
+    .bigqr-card img, .bigqr-card canvas { display: block; }
+    .bigqr-cap { font-family: var(--mono); font-size: 15px; letter-spacing: 2px; text-transform: uppercase; color: var(--coral); margin-top: 12px; }
+    .bigqr-url { font-family: var(--mono); font-size: 14px; color: var(--muted); margin-top: 5px; }
   </style>
 </head>
 <body>
@@ -33,10 +47,16 @@
     <div class="subbar"><span id="countlabel">Entries</span><b id="count">00</b></div>
   </div>
   <div id="feed" class="feed"></div>
+  <div class="joinqr" id="joinqr">
+    <div id="cornerqr"></div>
+    <div class="joinqr-cap">掃描加入<br><span>Scan to join</span></div>
+  </div>
   <div class="hint">每 2 秒自動更新 · F11 全螢幕投影</div>
 
   <script>
     const slug = decodeURIComponent((location.pathname.split("/wall/")[1] || "")).replace(/\/+$/,"");
+    const joinURL = location.origin + "/s/" + slug;
+    const joinLabel = location.host + "/s/" + slug;
     const feed = document.getElementById("feed");
     const seen = new Set();
     const ACCENT = ["#c0543d", "#cf98ae", "#7f8a6f"];
@@ -60,7 +80,20 @@
       try {
         const data = await (await fetch(`/api/list?slug=${encodeURIComponent(slug)}`)).json();
         document.getElementById("count").textContent = String(data.count).padStart(2, "0");
-        if (data.count === 0) { feed.innerHTML = `<div class="mascot-box" style="margin-top:12vh"><img src="/mascot.svg" alt=""><div class="bubble">等待第一筆，快掃 QR 加入！</div></div>`; return; }
+        if (data.count === 0) {
+          document.getElementById("joinqr").style.display = "none"; // 開場改用中央大 QR
+          feed.style.columnWidth = "auto"; // 關掉多欄，讓開場區塊置中不被拆欄
+          feed.innerHTML = `<div class="empty-join">
+            <img class="empty-mascot" src="/mascot.svg" alt="">
+            <div class="bigqr-card"><div id="bigqr"></div><div class="bigqr-cap">掃描加入 · Scan to join</div><div class="bigqr-url">${escapeHtml(joinLabel)}</div></div>
+          </div>`;
+          const bq = document.getElementById("bigqr");
+          if (bq && window.QRCode) new QRCode(bq, { text: joinURL, width: 200, height: 200, colorDark: "#1c1b16", colorLight: "#ffffff" });
+          return;
+        }
+        document.getElementById("joinqr").style.display = "flex"; // 進行中：右下角常駐 QR
+        renderCornerQR();
+        feed.style.columnWidth = ""; // 回復多欄名單排版
         const firstLoad = seen.size === 0;
         let items = data.entries.slice();
         if (SESSION.mode === "qa") items.sort((a,b) => (b.votes||0)-(a.votes||0) || b.at-a.at);
@@ -85,6 +118,12 @@
       } catch {}
     }
 
+    function renderCornerQR(){
+      const box = document.getElementById("cornerqr");
+      if (box.dataset.done || !window.QRCode) return;
+      new QRCode(box, { text: joinURL, width: 128, height: 128, colorDark: "#1c1b16", colorLight: "#ffffff" });
+      box.dataset.done = "1";
+    }
     function fmtTime(ms){ return new Date(ms).toLocaleTimeString("zh-TW",{hour:"2-digit",minute:"2-digit"}); }
     function escapeHtml(s){return String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));}
 
