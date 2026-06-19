@@ -3,6 +3,13 @@
 給工作坊 / 活動用的即時牆：學員掃 QR、即時上牆，可投影到大螢幕或掛在投影片角落。
 一個工具、**三種模式**，部署在 [Netlify](https://www.netlify.com/)，資料存 Netlify Blobs（內建，免另接資料庫）。
 
+## 想要自己的一份?(給講師)
+[![Deploy to Netlify](https://www.netlify.com/img/deploy/button.svg)](https://app.netlify.com/start/deploy?repository=https://github.com/Summerhuang585/my-practice)
+
+點上面按鈕,5 分鐘就能擁有**你自己的**簽到牆(自己的網址與資料)。第一次部署、沒寫過程式也沒關係 → 看 **[📖 講師部署教學(超詳細圖文)](docs/講師部署教學.md)**。
+
+> ⚠️ 一鍵部署需要本 repo 為 **Public**。
+
 ## 文件
 - [PRD 產品需求文件](docs/PRD.md) — 目標、使用者、功能、成功標準
 - [SDD 軟體設計文件](docs/SDD.md) — 架構、路由、API、資料模型
