@@ -58,13 +58,19 @@
     let SESSION = null;
     const MODE_LABEL = { checkin: "簽到", message: "留言", qa: "Q&A" };
 
+    let ended = false;
+    let ticks = 0;
+
     async function loadSession() {
       try { const r = await fetch(`/api/session?slug=${encodeURIComponent(slug)}`);
+        if (r.status === 404) { ended = true; list.innerHTML = `<div class="empty">場次已結束</div>`;
+          document.getElementById("joinbar").style.display = "none"; return; }
         if (r.ok) { SESSION = await r.json(); document.getElementById("mode").textContent = "· " + (MODE_LABEL[SESSION.mode]||""); } } catch {}
     }
 
     async function refresh() {
-      if (!SESSION) return;
+      if (!SESSION || ended) return;
+      if (++ticks % 15 === 0) { await loadSession(); if (ended) return; }
       try {
         const data = await (await fetch(`/api/list?slug=${encodeURIComponent(slug)}`)).json();
         document.getElementById("count").textContent = data.count;

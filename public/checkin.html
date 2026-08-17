@@ -49,7 +49,7 @@
         if (!res.ok) throw new Error((await res.json()).error || "找不到場次");
         SESSION = await res.json();
         render();
-      } catch (e) { app.innerHTML = `<div class="center-msg">😵 ${escapeHtml(e.message)}</div>`; }
+      } catch (e) { app.innerHTML = `<div class="center-msg">${escapeHtml(e.message)}</div>`; }
     }
 
     function render() {
@@ -116,11 +116,15 @@
         btn.disabled = true;
         try {
           const res = await fetch("/api/checkin", { method: "POST", headers: { "content-type": "application/json" },
-            body: JSON.stringify({ slug, name, message: msgEl ? msgEl.value.trim() : "", emoji: s.allowEmoji ? chosenEmoji : "" }) });
+            body: JSON.stringify({ slug, name, clientId, message: msgEl ? msgEl.value.trim() : "", emoji: s.allowEmoji ? chosenEmoji : "" }) });
           const data = await res.json();
-          if (!res.ok) throw new Error(data.error || "送出失敗");
+          if (!res.ok) {
+            // 同名不同人：不要讓第二個同名的人卡死，直接把游標放回名字欄讓他加註記
+            if (data.nameTaken) { nameEl.focus(); nameEl.select(); }
+            throw new Error(data.error || "送出失敗");
+          }
           if (msgEl) msgEl.value = "";
-          if (s.mode === "checkin") { nameEl.value = ""; err.innerHTML = `<span style="color:var(--sage)">簽到成功 ✅</span>`; }
+          if (s.mode === "checkin") { nameEl.value = ""; err.innerHTML = `<span style="color:var(--sage)">簽到成功</span>`; }
           refresh();
         } catch (e) { err.textContent = e.message; }
         finally { btn.disabled = false; }
@@ -128,12 +132,12 @@
 
       nameEl.focus();
       refresh();
-      setInterval(refresh, 2500);
+      setInterval(refresh, 2000);
     }
 
     async function refresh() {
       try {
-        const res = await fetch(`/api/list?slug=${encodeURIComponent(slug)}`);
+        const res = await fetch(`/api/list?slug=${encodeURIComponent(slug)}&cid=${encodeURIComponent(clientId)}`);
         const data = await res.json();
         const c = document.getElementById("count"); if (c) c.textContent = String(data.count).padStart(2, "0");
         const feed = document.getElementById("feed"); if (!feed) return;
@@ -146,7 +150,7 @@
           const isNew = !seen.has(e.id); seen.add(e.id);
           const no = String(SESSION.mode==="qa" ? i+1 : total - i).padStart(2, "0");
           const color = ACCENT[i % ACCENT.length];
-          const voted = Array.isArray(e.voters) && e.voters.includes(clientId);
+          const voted = e.voted === true;
           return `<div class="entry ${isNew && !firstLoad ? "flash" : ""}">
             <div class="no" style="color:${color}">${no}</div>
             <div>

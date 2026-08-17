@@ -1,21 +1,24 @@
 import { getStore } from "@netlify/blobs";
+import { partitionKeys, csvCell } from "./lib/validate.mjs";
 
 // 匯出名單 CSV（需要 adminToken）
-// GET ?slug=xxx&token=adminToken
+// GET ?slug=xxx，token 放在 x-admin-token 標頭。
+// 不放網址是刻意的：網址會留在瀏覽器歷史與伺服器日誌裡，等於權杖外流。
 export default async (req) => {
   const url = new URL(req.url);
   const slug = url.searchParams.get("slug");
-  const token = url.searchParams.get("token");
+  const token = req.headers.get("x-admin-token");
   if (!slug || !token) return new Response("缺少參數", { status: 400 });
 
-  const sessions = getStore("sessions");
-  const session = await sessions.get(slug, { type: "json" });
+  const session = await getStore("sessions").get(slug, { type: "json" });
   if (!session || session.adminToken !== token) return new Response("沒有權限", { status: 401 });
 
   const store = getStore("checkins");
   const { blobs } = await store.list({ prefix: `${slug}/` });
-  const entries = (await Promise.all(blobs.map((b) => store.get(b.key, { type: "json" })))).filter(Boolean);
-  entries.sort((a, b) => a.at - b.at);
+  const { entryKeys, votes } = partitionKeys(blobs.map((b) => b.key), slug);
+  const entries = (await Promise.all(entryKeys.map((k) => store.get(k, { type: "json" }))))
+    .filter(Boolean)
+    .sort((a, b) => a.at - b.at);
 
   const rows = [["序號", "名字", "內容", "愛心數", "已回答", "時間"]];
   entries.forEach((e, i) => {
@@ -23,7 +26,7 @@ export default async (req) => {
       i + 1,
       e.name || "",
       e.message || "",
-      e.votes != null ? e.votes : "",
+      session.mode === "checkin" ? "" : (votes.get(e.id) || 0),
       e.answered === true ? "是" : (session.mode === "qa" ? "否" : ""),
       new Date(e.at).toLocaleString("zh-TW", { hour12: false }),
     ]);
@@ -36,11 +39,7 @@ export default async (req) => {
     headers: {
       "content-type": "text/csv; charset=utf-8",
       "content-disposition": `attachment; filename="${fname}"`,
+      "cache-control": "no-store",
     },
   });
 };
-
-function csvCell(v) {
-  const s = String(v);
-  return /[",\r\n]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s;
-}

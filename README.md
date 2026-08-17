@@ -8,7 +8,7 @@
 
 點上面按鈕,5 分鐘就能擁有**你自己的**簽到牆(自己的網址與資料)。第一次部署、沒寫過程式也沒關係 → 看 **[📖 講師部署教學(超詳細圖文)](docs/講師部署教學.md)**。
 
-> ⚠️ 一鍵部署需要本 repo 為 **Public**。
+> 一鍵部署按鈕要能用,本 repo 必須是 **Public**。設成 Private 時按鈕會失敗。
 
 ## 文件
 - [PRD 產品需求文件](docs/PRD.md) — 目標、使用者、功能、成功標準
@@ -39,6 +39,12 @@ push / PR 會由 GitHub Actions 自動跑(`.github/workflows/ci.yml`)。
 | 角落即時 | `/ticker/<代碼>` | 細長條，常駐小視窗擺投影片旁 |
 | OBS 透明疊加 | `/ticker/<代碼>?transparent=1` | OBS browser source，浮在投影片上 |
 
+## 關於場次代碼
+
+代碼長這樣：`ai-0613-k3f9pm`。前半段是你自己取的，後面六碼是系統加的。
+
+**這串代碼等於看名單的鑰匙**：拿到代碼的人就看得到那一場的名字與留言（投影牆與學員頁本來就要能顯示，所以不可能再加密碼）。隨機尾碼是為了讓別人猜不到、試不出來。連結靠 QR 與複製貼上傳，沒有人需要手打，所以長一點不影響使用。
+
 ## 角落即時模式怎麼用
 
 - **常駐小視窗**：開 `/ticker/代碼`，把瀏覽器視窗縮小、設「永遠在最上層」，擺在投影片旁邊。
@@ -67,5 +73,6 @@ npx netlify dev   # http://localhost:8888
 - 前端：純 HTML/CSS/JS（無建置步驟），共用 `public/brand.css`
 - 後端：Netlify Functions（`netlify/functions/*.mjs`），共用純邏輯於 `lib/`
   - `session` 建立/改名/刪除/讀取 ｜ `checkin` 送出 ｜ `list` 列表 ｜ `vote` 按讚 ｜ `answer` 標記已回答 ｜ `remove` 刪除單筆 ｜ `export` 匯出 CSV ｜ `cleanup` 每日排程清理逾期資料
-  - 公開寫入端點（`checkin`/`vote`）有限流防濫用
+  - 公開端點（`session` 建立、`checkin`、`vote`）有限流防濫用
 - 儲存：Netlify Blobs ｜ 即時：前端每 2 秒輪詢
+- 票是一人一票各存一個 blob，不是把票數寫回同一筆，所以同時按讚不會互相蓋掉

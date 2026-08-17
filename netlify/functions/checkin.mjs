@@ -1,10 +1,13 @@
 import { getStore } from "@netlify/blobs";
 import { json } from "./lib/http.mjs";
-import { cleanName, cleanMessage, isAllowedEmoji, isDuplicateName } from "./lib/validate.mjs";
+import {
+  cleanName, cleanMessage, isAllowedEmoji, cleanClientId,
+  nameEntryId, randomEntryId, entryKey,
+} from "./lib/validate.mjs";
 import { rateLimit, clientIp } from "./lib/ratelimit.mjs";
 
 // 學員送出一筆（簽到 / 留言 / 提問，依場次模式）
-// POST body: { slug, name, message?, emoji? }
+// POST body: { slug, name, message?, emoji?, clientId? }
 const RL = { limit: 40, windowMs: 10000 }; // 每 IP 10 秒上限（放寬，僅擋灌爆）
 
 export default async (req) => {
@@ -12,7 +15,7 @@ export default async (req) => {
 
   const rl = await rateLimit("checkin", clientIp(req), RL);
   if (!rl.allowed) {
-    return json({ error: "太快了，請稍等幾秒再試 🙏" }, 429,
+    return json({ error: "送出太快了，請稍等幾秒再試" }, 429,
       { "retry-after": String(Math.ceil(rl.retryAfterMs / 1000)) });
   }
 
@@ -30,30 +33,40 @@ export default async (req) => {
   if (nameRes.error) return json({ error: nameRes.error }, 400);
   const name = nameRes.name;
 
+  const message = session.mode === "checkin" ? "" : cleanMessage(body.message);
+  if (session.mode !== "checkin" && !message) {
+    return json({ error: session.mode === "qa" ? "請輸入問題" : "請輸入內容" }, 400);
+  }
+
+  const cid = cleanClientId(body.clientId);
   const store = getStore("checkins");
 
-  // 簽到模式：防同名（同一個名字不能重複簽到）
+  // 簽到模式：entry id 直接由名字算出來，所以查重只要讀一次 key，
+  // 不用把整場的資料撈出來逐筆比對（人多時那樣會愈來愈慢）。
+  let id;
   if (session.mode === "checkin") {
-    const { blobs } = await store.list({ prefix: `${slug}/` });
-    const existing = await Promise.all(blobs.map((b) => store.get(b.key, { type: "json" })));
-    if (isDuplicateName(existing, name)) return json({ error: "你已經簽到過了 ✅" }, 409);
+    id = nameEntryId(name);
+    const existing = await store.get(entryKey(slug, id), { type: "json" });
+    if (existing) {
+      if (cid && existing.cid === cid) {
+        return json({ error: "你已經完成簽到了", already: true }, 409);
+      }
+      // 同名不同人：擋死會讓班上第二個同名的人永遠簽不到，所以要告訴他怎麼做
+      return json({
+        error: "這個名字已經有人簽到了。如果你是另一個人，請在名字後面加上可以分辨的字，例如「王小明-B」。",
+        nameTaken: true,
+      }, 409);
+    }
+  } else {
+    id = randomEntryId();
   }
 
-  const id = `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
   const entry = { id, name, at: Date.now() };
+  if (cid) entry.cid = cid;
+  if (session.mode !== "checkin") entry.message = message;
+  if (session.allowEmoji && isAllowedEmoji(body.emoji)) entry.emoji = body.emoji;
+  if (session.mode === "qa") entry.answered = false;
 
-  if (session.mode !== "checkin") {
-    entry.message = cleanMessage(body.message);
-  }
-  if (session.allowEmoji && isAllowedEmoji(body.emoji)) {
-    entry.emoji = body.emoji;
-  }
-  if (session.mode === "qa") {
-    entry.votes = 0;
-    entry.voters = [];
-    entry.answered = false;
-  }
-
-  await store.setJSON(`${slug}/${id}`, entry);
+  await store.setJSON(entryKey(slug, id), entry);
   return json(entry);
 };

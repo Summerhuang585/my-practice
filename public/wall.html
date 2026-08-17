@@ -68,8 +68,13 @@
     document.getElementById("date").textContent = "CHECK·IN WALL — " +
       new Date().toLocaleDateString("en-US", { month: "short", day: "2-digit", year: "numeric" }).toUpperCase();
 
+    let ended = false;
+    let ticks = 0;
+
     async function loadSession() {
-      try { const r = await fetch(`/api/session?slug=${encodeURIComponent(slug)}`);
+      try {
+        const r = await fetch(`/api/session?slug=${encodeURIComponent(slug)}`);
+        if (r.status === 404) { showEnded(); return; }
         if (r.ok) { SESSION = await r.json();
           document.getElementById("title").textContent = SESSION.title;
           document.getElementById("mode").textContent = MODE_LABEL[SESSION.mode] || "";
@@ -77,22 +82,38 @@
           document.title = SESSION.title + " · 簽到牆"; } } catch {}
     }
 
+    // 場次被講者刪掉時，牆上原本會顯示成「還沒有人加入」並繼續叫人掃 QR，
+    // 掃了才發現場次不存在。改成明講已結束。
+    function showEnded() {
+      ended = true;
+      document.getElementById("joinqr").style.display = "none";
+      feed.style.columnWidth = "auto";
+      feed.innerHTML = `<div class="empty-join"><div class="bigqr-card"><div class="bigqr-cap">這個場次已結束</div></div></div>`;
+    }
+
+    function renderEmptyJoin() {
+      document.getElementById("joinqr").style.display = "none"; // 開場改用中央大 QR
+      feed.style.columnWidth = "auto"; // 關掉多欄，讓開場區塊置中不被拆欄
+      if (feed.dataset.empty === "1") return; // 已經在開場狀態就別重畫，否則 QR 每 2 秒閃一次
+      feed.innerHTML = `<div class="empty-join">
+        <img class="empty-mascot" src="/mascot.svg" alt="">
+        <div class="bigqr-card"><div id="bigqr"></div><div class="bigqr-cap">掃描加入 · Scan to join</div><div class="bigqr-url">${escapeHtml(joinLabel)}</div></div>
+      </div>`;
+      const bq = document.getElementById("bigqr");
+      if (bq && window.QRCode) new QRCode(bq, { text: joinURL, width: 200, height: 200, colorDark: "#1c1b16", colorLight: "#ffffff" });
+      feed.dataset.empty = "1";
+    }
+
     async function refresh() {
-      if (!SESSION) return;
+      if (!SESSION || ended) return;
+      // 每 30 秒回頭確認場次還在、標題有沒有被改
+      if (++ticks % 15 === 0) await loadSession();
+      if (ended) return;
       try {
         const data = await (await fetch(`/api/list?slug=${encodeURIComponent(slug)}`)).json();
         document.getElementById("count").textContent = String(data.count).padStart(2, "0");
-        if (data.count === 0) {
-          document.getElementById("joinqr").style.display = "none"; // 開場改用中央大 QR
-          feed.style.columnWidth = "auto"; // 關掉多欄，讓開場區塊置中不被拆欄
-          feed.innerHTML = `<div class="empty-join">
-            <img class="empty-mascot" src="/mascot.svg" alt="">
-            <div class="bigqr-card"><div id="bigqr"></div><div class="bigqr-cap">掃描加入 · Scan to join</div><div class="bigqr-url">${escapeHtml(joinLabel)}</div></div>
-          </div>`;
-          const bq = document.getElementById("bigqr");
-          if (bq && window.QRCode) new QRCode(bq, { text: joinURL, width: 200, height: 200, colorDark: "#1c1b16", colorLight: "#ffffff" });
-          return;
-        }
+        if (data.count === 0) { renderEmptyJoin(); return; }
+        feed.dataset.empty = "0";
         document.getElementById("joinqr").style.display = "flex"; // 進行中：右下角常駐 QR
         renderCornerQR();
         feed.style.columnWidth = ""; // 回復多欄名單排版

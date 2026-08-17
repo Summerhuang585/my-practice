@@ -1,6 +1,6 @@
 {
   "name": "checkin-wall",
-  "version": "1.0.0",
+  "version": "1.2.0",
   "description": "課程簽到牆 — 學員輸入名字即時出現在牆上，可投影到大螢幕",
   "private": true,
   "type": "module",

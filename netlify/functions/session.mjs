@@ -1,6 +1,7 @@
 import { getStore } from "@netlify/blobs";
 import { json } from "./lib/http.mjs";
-import { slugify, cleanTitle, normalizeMode } from "./lib/validate.mjs";
+import { cleanTitle, normalizeMode, makeSlug } from "./lib/validate.mjs";
+import { rateLimit, clientIp } from "./lib/ratelimit.mjs";
 
 // 建立 / 讀取 / 改名 / 刪除「場次」
 // POST   建立    body: { title, code?, mode, allowAnonymous, allowEmoji }
@@ -8,10 +9,18 @@ import { slugify, cleanTitle, normalizeMode } from "./lib/validate.mjs";
 // DELETE 刪除    body: { slug, adminToken }
 // GET    ?slug=  公開資訊（不含 adminToken）
 
+const CREATE_RL = { limit: 10, windowMs: 60000 }; // 每 IP 每分鐘最多建 10 場
+
 export default async (req) => {
   const sessions = getStore("sessions");
 
   if (req.method === "POST") {
+    const rl = await rateLimit("session", clientIp(req), CREATE_RL);
+    if (!rl.allowed) {
+      return json({ error: "建立太頻繁，請稍等一下再試" }, 429,
+        { "retry-after": String(Math.ceil(rl.retryAfterMs / 1000)) });
+    }
+
     let body = {};
     try { body = await req.json(); } catch { return json({ error: "請傳入 JSON" }, 400); }
 
@@ -20,11 +29,14 @@ export default async (req) => {
 
     const mode = normalizeMode(body.mode);
 
-    let slug = slugify(body.code);
-    if (!slug) slug = randomSlug();
-
-    const existing = await sessions.get(slug, { type: "json" });
-    if (existing) return json({ error: "這個代碼已被使用，請換一個" }, 409);
+    // 代碼一律帶隨機尾碼（代碼就是看名單的鑰匙，必須猜不到）。
+    // 理論上會撞，所以試幾次；連續撞代表隨機來源有問題，寧可回錯也不要覆蓋別人的場次。
+    let slug = null;
+    for (let i = 0; i < 5; i++) {
+      const candidate = makeSlug(body.code);
+      if (!(await sessions.get(candidate, { type: "json" }))) { slug = candidate; break; }
+    }
+    if (!slug) return json({ error: "代碼產生失敗，請再試一次" }, 503);
 
     const data = {
       slug, title, mode,
@@ -54,7 +66,7 @@ export default async (req) => {
     return json(pub);
   }
 
-  // 刪除整個場次（需要 adminToken），連同底下所有簽到/留言一起清除
+  // 刪除整個場次（需要 adminToken），連同底下所有簽到/留言/票一起清除
   if (req.method === "DELETE") {
     let body = {};
     try { body = await req.json(); } catch { return json({ error: "請傳入 JSON" }, 400); }
@@ -73,9 +85,8 @@ export default async (req) => {
   const slug = url.searchParams.get("slug");
   if (!slug) return json({ error: "缺少 slug" }, 400);
   const data = await sessions.get(slug, { type: "json" });
-  if (!data) return json({ error: "找不到這個場次" }, 404);
+  if (!data) return json({ error: "找不到這個場次" }, 404, { "cache-control": "no-store" });
   const { adminToken, ...pub } = data;
-  return json(pub);
+  // 改名後展示頁要馬上跟著變，不能被快取住
+  return json(pub, 200, { "cache-control": "no-store" });
 };
-
-function randomSlug() { return "s-" + Math.random().toString(36).slice(2, 8); }

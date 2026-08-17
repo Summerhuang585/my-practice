@@ -5,6 +5,14 @@
 [functions]
   node_bundler = "esbuild"
 
+# 網址裡帶著場次代碼（等於看名單的鑰匙），不能讓它跟著 Referer 跑到
+# Google Fonts、jsdelivr 這些外部主機去。
+[[headers]]
+  for = "/*"
+  [headers.values]
+    Referrer-Policy = "no-referrer"
+    X-Content-Type-Options = "nosniff"
+
 # 把 /api/xxx 轉到對應的 serverless function
 [[redirects]]
   from = "/api/*"
