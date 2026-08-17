@@ -39,6 +39,10 @@
     .hint-note b { color: var(--coral); }
     .btn.ghost.danger { color: var(--coral); border-color: var(--coral); }
     .btn.ghost.danger:hover { background: var(--coral); color: #fff; }
+    .whose { background: #fff; border: 3px solid var(--coral); box-shadow: 5px 5px 0 var(--ink); padding: 18px 20px; margin-bottom: 24px; }
+    .whose b { font-size: 15px; }
+    .whose p { margin: 8px 0 0; font-size: 14px; line-height: 1.7; color: var(--ink); }
+    .whose .whose-act { margin-top: 14px; }
     .tablewrap { overflow-x: auto; -webkit-overflow-scrolling: touch; }
     .tablewrap table { min-width: 460px; }
     @media (max-width: 560px) {
@@ -53,7 +57,16 @@
 <body>
   <div class="wrap">
     <div class="kicker" style="border-top:2px solid var(--ink)"><span class="live">SUMMER'S LAB</span><span>CHECK·IN WALL · ADMIN</span></div>
-    <h1 class="page">簽到牆 — 老師後台</h1>
+    <h1 class="page">簽到牆 · 老師後台</h1>
+
+    <!-- 這段在每一份部署上都會顯示。在自己的站上它只是說明，
+         在別人的站上它就是攔截：新手不會知道「這是誰的站」有差，要直接講。 -->
+    <div class="whose">
+      <b>先確認一件事：這是誰的網站？</b>
+      <p>在這裡建立的場次，參加者的名字與內容會存在<b>這個網站的擁有者</b>那邊。</p>
+      <p>如果你是照別人給的連結進來的，請先弄一份自己的再用，五分鐘、免費、不用信用卡。</p>
+      <p class="whose-act"><a class="btn ghost small" href="/guide">怎麼弄一份自己的</a></p>
+    </div>
 
     <div class="card">
       <h2>建立新場次</h2>
