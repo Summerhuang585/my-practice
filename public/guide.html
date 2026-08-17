@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>使用說明 · 課程簽到牆</title>
+  <meta name="description" content="課程簽到牆的使用說明：三種模式、現場怎麼跑、怎麼弄一份自己的。" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@400;600;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/brand.css">
+  <style>
+    /* 標題與標籤維持像素字，內文換成一般字體。
+       這頁是拿來讀的，整頁像素字在手機上看長段落太吃力。 */
+    .wrap { max-width: 640px; margin: 0 auto; padding: 26px 22px 70px; }
+    .body-text { font-family: "Noto Serif TC", serif; font-size: 16px; line-height: 1.85; }
+    .body-text h2 { font-family: var(--display); font-size: 17px; line-height: 1.5;
+      margin: 40px 0 14px; padding-top: 16px; border-top: 3px solid var(--ink); }
+    .body-text h2:first-of-type { margin-top: 28px; }
+    .body-text p { margin: 0 0 14px; }
+    .body-text ol, .body-text ul { margin: 0 0 14px; padding-left: 22px; }
+    .body-text li { margin-bottom: 10px; }
+    .body-text strong { font-weight: 900; }
+    .lead { font-family: "Noto Serif TC", serif; font-size: 18px; line-height: 1.8; margin: 0 0 8px; }
+
+    .card { background: var(--paper2); border: 3px solid var(--ink); box-shadow: 5px 5px 0 var(--ink);
+      padding: 18px 20px; margin: 18px 0; }
+    .card .cap { font-family: var(--mono); font-size: 11px; letter-spacing: 1px; text-transform: uppercase;
+      color: var(--coral); margin-bottom: 8px; }
+
+    .modes { margin: 6px 0 0; }
+    .mode { display: grid; grid-template-columns: 92px 1fr; gap: 14px; padding: 14px 0; border-bottom: 1px solid var(--rule); }
+    .mode:last-child { border-bottom: 0; }
+    .mode .nm { font-family: var(--display); font-size: 14px; line-height: 1.5; color: var(--coral); }
+    .mode .de { font-family: "Noto Serif TC", serif; font-size: 15px; line-height: 1.7; }
+
+    table.links { width: 100%; border-collapse: collapse; margin: 6px 0 0; }
+    table.links th { font-family: var(--mono); font-size: 11px; letter-spacing: 1px; text-transform: uppercase;
+      color: var(--muted); text-align: left; padding: 8px 6px; border-bottom: 2px solid var(--ink); }
+    table.links td { padding: 11px 6px; border-bottom: 1px solid var(--rule); vertical-align: top;
+      font-family: "Noto Serif TC", serif; font-size: 15px; line-height: 1.7; }
+    table.links td.k { font-family: var(--display); font-size: 13px; line-height: 1.6; white-space: nowrap; }
+    .tablewrap { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+    .tablewrap table { min-width: 420px; }
+
+    .warn { border-left: 8px solid var(--coral); }
+    .warn ol { counter-reset: w; list-style: none; padding-left: 0; margin: 0; }
+    .warn ol li { counter-increment: w; position: relative; padding-left: 34px; margin-bottom: 16px; }
+    .warn ol li:last-child { margin-bottom: 0; }
+    .warn ol li::before { content: counter(w); position: absolute; left: 0; top: 1px;
+      font-family: var(--display); font-size: 13px; color: #fff; background: var(--coral);
+      border: 2px solid var(--ink); width: 24px; height: 24px; display: flex; align-items: center; justify-content: center; }
+
+    .urlbox { font-family: var(--mono); font-size: 12px; word-break: break-all; background: var(--paper);
+      border: 2px dashed var(--ink); padding: 9px 11px; margin-top: 8px; }
+    a { color: var(--coral); }
+    .cta-row { display: flex; gap: 12px; flex-wrap: wrap; margin: 22px 0 6px; }
+    a.btn { text-decoration: none; display: inline-block; }
+    .toc { font-family: var(--mono); font-size: 12px; line-height: 2; margin: 18px 0 0; }
+    .toc a { display: block; }
+    @media (max-width: 520px) {
+      .wrap { padding: 22px 16px 60px; }
+      .mode { grid-template-columns: 1fr; gap: 4px; }
+      /* 手機上把兩欄表格拆成堆疊，用左右捲動看內容太難讀 */
+      .tablewrap { overflow-x: visible; }
+      .tablewrap table { min-width: 0; }
+      table.links thead { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
+      table.links tr { display: block; padding: 14px 0; border-bottom: 1px solid var(--rule); }
+      table.links tr:last-child { border-bottom: 0; }
+      table.links td { display: block; border-bottom: 0; padding: 0; }
+      table.links td.k { white-space: normal; color: var(--coral); margin-bottom: 6px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="rule"></div>
+    <div class="kicker"><span class="live">Summer's Lab</span><span>使用說明</span></div>
+    <div class="rule thin"></div>
+
+    <h1 class="h-title">課程簽到牆<br>怎麼用</h1>
+    <p class="lead">上課或開會的時候，讓現場的人用手機掃一個QR，名字、留言或問題就即時出現在你的投影畫面上。</p>
+    <p class="dek">不用安裝、不用註冊、參加者不用加好友。</p>
+
+    <div class="toc">
+      <a href="#modes">01 三種模式，一場選一種</a>
+      <a href="#flow">02 現場怎麼跑</a>
+      <a href="#links">03 四個連結分別什麼時候用</a>
+      <a href="#own">04 弄一份自己的</a>
+      <a href="#must">05 三件一定要知道的事</a>
+      <a href="#faq">06 常見狀況</a>
+    </div>
+
+    <div class="body-text">
+
+      <h2 id="modes">01 三種模式，一場選一種</h2>
+      <p>建立場次的時候選，選好之後這一場就固定是那個模式。要換模式就另外開一場。</p>
+      <div class="card">
+        <div class="modes">
+          <div class="mode">
+            <div class="nm">簽到</div>
+            <div class="de">算出席用。一律實名，同一個人不會重複，結束後可以匯出CSV名單。</div>
+          </div>
+          <div class="mode">
+            <div class="nm">留言</div>
+            <div class="de">開場破冰用。可以匿名，可以選一個心情圖示，也可以幫別人的留言按愛心。</div>
+          </div>
+          <div class="mode">
+            <div class="nm">提問</div>
+            <div class="de">收問題用。可以匿名，愛心多的問題自動排到前面，你回答完可以標記已回答。</div>
+          </div>
+        </div>
+      </div>
+
+      <h2 id="flow">02 現場怎麼跑</h2>
+      <ol>
+        <li><strong>課前：建場次。</strong>打開後台，填場次名稱、選模式，按建立。系統會給你四個連結和一個QR。</li>
+        <li><strong>上課：投出去。</strong>把投影牆打開投到大螢幕就好，投影牆本身就帶著QR，參加者直接掃畫面上那個。按F11可以全螢幕。</li>
+        <li><strong>課後：收名單。</strong>簽到模式在後台按匯出CSV，用Excel打開就是出席名單。</li>
+      </ol>
+      <div class="card">
+        <div class="cap">你的後台網址</div>
+        <div class="urlbox" id="adminUrl">/admin</div>
+        <p style="margin:12px 0 0; font-size:15px; font-family:'Noto Serif TC',serif; line-height:1.7">建議加到瀏覽器書籤。你建立過的場次都會記在這一頁。</p>
+      </div>
+
+      <h2 id="links">03 四個連結分別什麼時候用</h2>
+      <p>建完場次會拿到四個連結，用途不一樣，不要給錯。</p>
+      <div class="tablewrap">
+        <table class="links">
+          <thead><tr><th>連結</th><th>什麼時候用</th></tr></thead>
+          <tbody>
+            <tr><td class="k">學員連結</td><td>給參加者的。這個是QR指向的地方，他們掃了就進到自己手機上的輸入畫面。</td></tr>
+            <tr><td class="k">投影牆</td><td>投到大螢幕的主畫面。內容會即時長出來，還沒有人的時候中間是一個大QR，有人加入後QR縮到右下角，遲到的人還是掃得到。</td></tr>
+            <tr><td class="k">角落即時</td><td>細細長長的一條。把瀏覽器視窗縮小、設成永遠在最上層，擺在你的簡報旁邊，就能一邊講一邊看。</td></tr>
+            <tr><td class="k">OBS透明疊加</td><td>直播或錄影用。在OBS加一個瀏覽器來源貼這個連結，背景是透明的，會直接浮在你的畫面上。</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h2 id="own">04 弄一份自己的</h2>
+      <p>你可以擁有一個完全屬於你的簽到牆：自己的網址、自己的資料，跟別人互不干擾。全程不用碰程式碼，需要一個email，不用信用卡。</p>
+      <p>照著部署教學走，大約五分鐘。已經有GitHub帳號會更快。</p>
+      <div class="cta-row">
+        <a class="btn" href="https://github.com/Summerhuang585/my-practice/blob/main/docs/%E8%AC%9B%E5%B8%AB%E9%83%A8%E7%BD%B2%E6%95%99%E5%AD%B8.md" target="_blank" rel="noopener">看部署教學</a>
+        <a class="btn ghost" href="https://app.netlify.com/start/deploy?repository=https://github.com/Summerhuang585/my-practice" target="_blank" rel="noopener">直接開始部署</a>
+      </div>
+      <p style="margin-top:16px">部署完之後，你也可以把頭像換成自己的，教學最後一段有寫。</p>
+
+      <h2 id="must">05 三件一定要知道的事</h2>
+      <div class="card warn">
+        <ol>
+          <li><strong>場次連結等於名單的鑰匙。</strong>牆的內容本來就是要投影出來的，所以沒辦法再上鎖，拿到連結的人就看得到那一場的名字和留言。連結後面那串隨機字元就是為了讓人猜不到。發給該場的參加者就好，不要貼到公開的地方。</li>
+          <li><strong>管理權存在你建立場次的那一台瀏覽器裡。</strong>換一台電腦打開後台，會看不到也管不了那場，名單也匯不出來。建議整場課從頭到尾用同一台。清瀏覽器資料也會一起清掉。</li>
+          <li><strong>資料三十天後自動刪除。</strong>包含參加者的名字和內容。要留存的名單，課後記得先匯出CSV。你也可以在後台隨時手動刪掉整場。</li>
+        </ol>
+      </div>
+
+      <h2 id="faq">06 常見狀況</h2>
+      <div class="tablewrap">
+        <table class="links">
+          <thead><tr><th>狀況</th><th>怎麼處理</th></tr></thead>
+          <tbody>
+            <tr><td class="k">說掃不進去</td><td>請他改用手機相機直接掃投影牆上的QR。手打網址很容易漏掉代碼後面那串隨機字元。</td></tr>
+            <tr><td class="k">班上有兩個同名</td><td>系統會請第二個人在名字後面加一個可以分辨的字，例如王小明-B，加了就簽得進去。</td></tr>
+            <tr><td class="k">牆上沒有反應</td><td>畫面每兩秒自己更新一次，送出後等一下就會出現。都沒有的話重新整理一次。</td></tr>
+            <tr><td class="k">想換一台電腦管理</td><td>目前做不到，管理權綁在建立場次的那台瀏覽器。真的要換，就在新的電腦重開一場。</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <p style="margin-top:32px"><a href="/admin">回到後台建場次</a>　<a href="https://github.com/Summerhuang585/my-practice/blob/main/docs/PRIVACY.md" target="_blank" rel="noopener">隱私說明</a></p>
+    </div>
+
+    <footer>✦ Summer's Lab ✦</footer>
+  </div>
+
+  <script>
+    // 每個人部署的網址都不一樣，直接把這一份的實際網址寫出來
+    document.getElementById("adminUrl").textContent = location.origin + "/admin";
+  </script>
+</body>
+</html>

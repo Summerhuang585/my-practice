@@ -19,7 +19,10 @@
     h1 { font-family: var(--display); font-weight: 900; font-size: clamp(46px, 12vw, 78px); line-height: .96; letter-spacing: -1px; margin: 24px 0 10px; }
     .lead { font-family: var(--display); font-style: italic; font-size: 20px; color: var(--muted); margin-bottom: 24px; }
     a.cta { display: inline-block; background: var(--coral); color: #fff; text-decoration: none; padding: 15px 30px;
-      font-family: var(--mono); font-size: 13px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; }
+      font-family: var(--mono); font-size: 13px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase;
+      border: 3px solid var(--ink); }
+    a.cta.ghost { background: var(--paper2); color: var(--ink); }
+    .cta-row { display: flex; gap: 12px; flex-wrap: wrap; }
     .modes3 { margin-top: 30px; border-top: 1px solid var(--ink); }
     .m { display: grid; grid-template-columns: 36px 1fr; gap: 14px; padding: 14px 0; border-bottom: 1px solid var(--rule); }
     .m .ic { font-family: var(--display); font-weight: 700; font-size: 20px; }
@@ -33,7 +36,10 @@
     <div class="topbar"><span class="b">● Summer's Lab</span><span>Check·in Wall</span></div>
     <h1>課程<br>簽到牆</h1>
     <div class="lead">學員掃 QR、即時上牆，投影到大螢幕。一個工具，三種模式。</div>
-    <a class="cta" href="/admin.html">老師：建立場次 →</a>
+    <div class="cta-row">
+      <a class="cta" href="/admin.html">老師：建立場次 →</a>
+      <a class="cta ghost" href="/guide.html">使用說明</a>
+    </div>
     <div class="modes3">
       <div class="m"><div class="ic" style="color:var(--coral)">01</div><div class="tx"><b>🟢 簽到</b><div>實名・防同名・可匯出 CSV 名單</div></div></div>
       <div class="m"><div class="ic" style="color:var(--pink)">02</div><div class="tx"><b>💬 留言</b><div>打招呼破冰・可匿名・emoji 心情</div></div></div>
