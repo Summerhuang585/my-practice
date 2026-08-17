@@ -11,7 +11,7 @@
 > 一鍵部署按鈕要能用,本 repo 必須是 **Public**。設成 Private 時按鈕會失敗。
 
 ## 文件
-- **[使用說明(給講師看的網頁版)](https://summers-lab-checkin.netlify.app/guide)** — 三種模式、現場怎麼跑、四個連結分別什麼時候用。部署後你自己那份在 `你的網址/guide`。
+- **使用說明(網頁版)** — 部署完成後開 `你的網址/guide`,首頁也有入口。內容:三種模式、現場怎麼跑、四個連結分別什麼時候用、三件必須知道的事。
 - [PRD 產品需求文件](docs/PRD.md) — 目標、使用者、功能、成功標準
 - [SDD 軟體設計文件](docs/SDD.md) — 架構、路由、API、資料模型
 - [隱私說明](docs/PRIVACY.md) ｜ [CHANGELOG](CHANGELOG.md) ｜ [LICENSE](LICENSE)(MIT)
