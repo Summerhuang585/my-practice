@@ -1,4 +1,4 @@
-import { getStore } from "@netlify/blobs";
+import { checkinStore } from "./lib/stores.mjs";
 import { json } from "./lib/http.mjs";
 import { partitionKeys, cleanClientId } from "./lib/validate.mjs";
 
@@ -10,7 +10,7 @@ export default async (req) => {
   if (!slug) return json({ error: "缺少 slug" }, 400, { "cache-control": "no-store" });
   const cid = cleanClientId(url.searchParams.get("cid"));
 
-  const store = getStore("checkins");
+  const store = checkinStore();
   const { blobs } = await store.list({ prefix: `${slug}/` });
 
   // 票是一人一票一個 blob，光看 key 就能算數量，不用再讀內容

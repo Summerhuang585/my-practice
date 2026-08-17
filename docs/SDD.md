@@ -121,6 +121,13 @@ slug = 講者自訂前綴 + `-` + 6 碼隨機尾碼(自訂留空時為 `s-xxxxxx
 - **即時顯示**:`/s`、`/wall`、`/ticker` 各自每 2 秒 `GET /api/list`;Q&A 依 votes 排序,其餘依時間。展示頁每 30 秒回頭確認場次還在,場次被刪就顯示「已結束」,不會繼續叫人掃一個失效的 QR。
 - **加入 QR**:展示頁前端用 `qrcodejs` 把 `location.origin + "/s/" + slug` 編碼成 QR。開場的大 QR 只畫一次,不隨輪詢重畫。
 
+### 5.1 一致性(`lib/stores.mjs`)
+Netlify Blobs 預設是**最終一致**:剛寫進去的東西馬上讀不一定讀得到(線上實測建完場次要等數十秒;本機 `netlify dev` 是即時的,所以測不出來)。
+
+本工具幾乎每個關鍵動作都是「寫完馬上有人要讀」:建完場次立刻把 QR 給人掃、送出簽到後下一個同名的人要靠這筆判重、按讚後同一個人再按要讀得到自己那票。因此 `sessions` 與 `checkins` 一律以 `consistency: "strong"` 取得;限流本來就是盡力而為,維持 eventual。
+
+`list()` 沒有一致性選項,清單仍可能慢一拍;展示頁本來就是每 2 秒輪詢,可接受。
+
 ## 7. 安全與限制
 - **slug 就是鑰匙**:`/api/list` 沒有權限檢查(投影牆與學員頁都要能顯示,加密碼不可行),所以拿到 slug 就看得到那場的名字與內容。防線是 slug 猜不到:一律帶 6 碼隨機尾碼(32 進位字母表,約 10 億組),且不接受純自訂的短代碼。
 - **Referrer**:頁面網址帶著 slug,`netlify.toml` 設 `Referrer-Policy: no-referrer`,避免 slug 隨 Referer 外流到 Google Fonts、jsdelivr 等外部主機。

@@ -1,4 +1,4 @@
-import { getStore } from "@netlify/blobs";
+import { sessionStore, checkinStore } from "./lib/stores.mjs";
 import { json } from "./lib/http.mjs";
 import { cleanTitle, normalizeMode, makeSlug } from "./lib/validate.mjs";
 import { rateLimit, clientIp } from "./lib/ratelimit.mjs";
@@ -12,7 +12,7 @@ import { rateLimit, clientIp } from "./lib/ratelimit.mjs";
 const CREATE_RL = { limit: 10, windowMs: 60000 }; // 每 IP 每分鐘最多建 10 場
 
 export default async (req) => {
-  const sessions = getStore("sessions");
+  const sessions = sessionStore();
 
   if (req.method === "POST") {
     const rl = await rateLimit("session", clientIp(req), CREATE_RL);
@@ -74,7 +74,7 @@ export default async (req) => {
     if (!slug || !adminToken) return json({ error: "缺少參數" }, 400);
     const data = await sessions.get(slug, { type: "json" });
     if (!data || data.adminToken !== adminToken) return json({ error: "沒有權限" }, 401);
-    const store = getStore("checkins");
+    const store = checkinStore();
     const { blobs } = await store.list({ prefix: `${slug}/` });
     await Promise.all(blobs.map((b) => store.delete(b.key)));
     await sessions.delete(slug);

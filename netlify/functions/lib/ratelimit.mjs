@@ -1,15 +1,13 @@
-import { getStore } from "@netlify/blobs";
+import { rateLimitStore } from "./stores.mjs";
 import { withinLimit } from "./ratelimit-core.mjs";
 import { safeKeyPart } from "./validate.mjs";
 
 export { clientIp } from "./ratelimit-core.mjs";
 
-export const RATELIMIT_STORE = "ratelimit";
-
 // 以 Netlify Blobs 記錄每個 key 最近的請求時間戳，超過上限即擋下。
 // 注意：教室常共用同一個對外 IP，因此上限刻意放寬，只攔「腳本式灌爆」。
 export async function rateLimit(bucket, key, { limit, windowMs }) {
-  const store = getStore(RATELIMIT_STORE);
+  const store = rateLimitStore();
   const id = `${safeKeyPart(bucket)}:${safeKeyPart(key)}`;
   let prev = [];
   try {

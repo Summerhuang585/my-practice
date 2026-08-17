@@ -1,4 +1,4 @@
-import { getStore } from "@netlify/blobs";
+import { sessionStore, checkinStore } from "./lib/stores.mjs";
 import { json } from "./lib/http.mjs";
 import { entryKey, votePrefix } from "./lib/validate.mjs";
 
@@ -13,10 +13,10 @@ export default async (req) => {
   const { slug, id, adminToken } = body;
   if (!slug || !id || !adminToken) return json({ error: "缺少參數" }, 400);
 
-  const session = await getStore("sessions").get(slug, { type: "json" });
+  const session = await sessionStore().get(slug, { type: "json" });
   if (!session || session.adminToken !== adminToken) return json({ error: "沒有權限" }, 401);
 
-  const store = getStore("checkins");
+  const store = checkinStore();
   const { blobs } = await store.list({ prefix: votePrefix(slug, id) });
   await Promise.all(blobs.map((b) => store.delete(b.key)));
   await store.delete(entryKey(slug, id));

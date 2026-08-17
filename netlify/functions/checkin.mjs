@@ -1,4 +1,4 @@
-import { getStore } from "@netlify/blobs";
+import { sessionStore, checkinStore } from "./lib/stores.mjs";
 import { json } from "./lib/http.mjs";
 import {
   cleanName, cleanMessage, isAllowedEmoji, cleanClientId,
@@ -25,7 +25,7 @@ export default async (req) => {
   const slug = String(body.slug || "").trim();
   if (!slug) return json({ error: "缺少 slug" }, 400);
 
-  const sessions = getStore("sessions");
+  const sessions = sessionStore();
   const session = await sessions.get(slug, { type: "json" });
   if (!session) return json({ error: "找不到這個場次" }, 404);
 
@@ -39,7 +39,7 @@ export default async (req) => {
   }
 
   const cid = cleanClientId(body.clientId);
-  const store = getStore("checkins");
+  const store = checkinStore();
 
   // 簽到模式：entry id 直接由名字算出來，所以查重只要讀一次 key，
   // 不用把整場的資料撈出來逐筆比對（人多時那樣會愈來愈慢）。

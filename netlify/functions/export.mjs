@@ -1,4 +1,4 @@
-import { getStore } from "@netlify/blobs";
+import { sessionStore, checkinStore } from "./lib/stores.mjs";
 import { partitionKeys, csvCell } from "./lib/validate.mjs";
 
 // 匯出名單 CSV（需要 adminToken）
@@ -10,10 +10,10 @@ export default async (req) => {
   const token = req.headers.get("x-admin-token");
   if (!slug || !token) return new Response("缺少參數", { status: 400 });
 
-  const session = await getStore("sessions").get(slug, { type: "json" });
+  const session = await sessionStore().get(slug, { type: "json" });
   if (!session || session.adminToken !== token) return new Response("沒有權限", { status: 401 });
 
-  const store = getStore("checkins");
+  const store = checkinStore();
   const { blobs } = await store.list({ prefix: `${slug}/` });
   const { entryKeys, votes } = partitionKeys(blobs.map((b) => b.key), slug);
   const entries = (await Promise.all(entryKeys.map((k) => store.get(k, { type: "json" }))))

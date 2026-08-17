@@ -1,4 +1,4 @@
-import { getStore } from "@netlify/blobs";
+import { sessionStore, checkinStore } from "./lib/stores.mjs";
 import { json } from "./lib/http.mjs";
 import { entryKey } from "./lib/validate.mjs";
 
@@ -13,10 +13,10 @@ export default async (req) => {
   const { slug, id, adminToken, answered } = body;
   if (!slug || !id || !adminToken) return json({ error: "缺少參數" }, 400);
 
-  const session = await getStore("sessions").get(slug, { type: "json" });
+  const session = await sessionStore().get(slug, { type: "json" });
   if (!session || session.adminToken !== adminToken) return json({ error: "沒有權限" }, 401);
 
-  const store = getStore("checkins");
+  const store = checkinStore();
   const key = entryKey(slug, id);
   const entry = await store.get(key, { type: "json" });
   if (!entry) return json({ error: "找不到這筆" }, 404);

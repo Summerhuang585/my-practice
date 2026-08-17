@@ -1,6 +1,5 @@
-import { getStore } from "@netlify/blobs";
+import { sessionStore, checkinStore, rateLimitStore } from "./lib/stores.mjs";
 import { json } from "./lib/http.mjs";
-import { RATELIMIT_STORE } from "./lib/ratelimit.mjs";
 
 // 排程清理：每天刪除超過保存期限的場次與其所有資料（含學員姓名）。
 // 由 Netlify Scheduled Functions 觸發（見檔尾 config.schedule）。
@@ -8,8 +7,8 @@ export const MAX_AGE_DAYS = 30;
 export const RATELIMIT_MAX_AGE_MS = 60 * 60 * 1000; // 限流紀錄留 1 小時就夠
 
 export default async () => {
-  const sessions = getStore("sessions");
-  const checkins = getStore("checkins");
+  const sessions = sessionStore();
+  const checkins = checkinStore();
   const cutoff = Date.now() - MAX_AGE_DAYS * 24 * 60 * 60 * 1000;
 
   const { blobs } = await sessions.list();
@@ -30,7 +29,7 @@ export default async () => {
 };
 
 async function sweepRateLimit() {
-  const store = getStore(RATELIMIT_STORE);
+  const store = rateLimitStore();
   const cutoff = Date.now() - RATELIMIT_MAX_AGE_MS;
   let n = 0;
   try {
